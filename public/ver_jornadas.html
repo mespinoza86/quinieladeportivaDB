@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Jornadas</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/ver_jornadas.js" defer></script>
+    <style>
+        /* Estilos para centrar el formulario */
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        select, ul, button {
+            width: 100%;
+            margin: 10px 0;
+        }
+        button {
+            width: auto;
+            align-self: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ver Jornadas</h1>
+    </header>
+    <main>
+        <section id="verJornadaSection" class="form-container">
+            <h2>Jornadas Disponibles</h2>
+            <select id="jornadaSelect"></select>
+            <ul id="partidosJornadaList"></ul>
+            <div class="button-container">
+                <button onclick="window.location.href='index.html'">Volver</button>
+                <button id="llenarJornadaButton">Llenar Jornada</button>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

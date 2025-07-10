@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Pronosticados por Jugador</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/ver-resultados.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Resultados Pronosticados por Jugador</h1>
+    </header>
+    <main>
+        <section id="verResultadosSection">
+            <form id="verResultadosForm" style="display: flex; flex-direction: column; align-items: center;">
+                <h2>Buscar Resultados</h2>
+                <label for="jugadorSelect">Jugador:</label>
+                <select id="jugadorSelect"></select>
+
+                <label for="jornadaSelect">Jornada:</label>
+                <select id="jornadaSelect"></select>
+
+                <button id="searchResultadosButton" type="button">Buscar Resultados</button>
+
+                <div id="resultadosContainer"></div>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <button onclick="window.location.href='index.html'">Volver</button>
+    </footer>
+</body>
+</html>

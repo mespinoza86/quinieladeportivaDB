@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados Totales de Jugadores</title>
+  <link rel="stylesheet" href="/css/styles.css"> <!-- Vinculación del CSS -->
+  <style>
+    /* Añade estilos básicos para el botón */
+    .button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      margin: 10px 0;
+      display: block;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    /* Asegúrate de que la tabla ocupe el 100% del ancho disponible */
+    .resultadosTotalesTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .resultadosTotalesTable th, .resultadosTotalesTable td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    .resultadosTotalesTable th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Resultados Totales de Jugadores</h1>
+  </header>
+
+  <section class="container">
+    <div class="styled-form">
+      <label for="jornada-select">Seleccionar Jornada:</label>
+      <select id="jornada-select">
+        <!-- Opciones de jornada -->
+      </select>
+      <button id="ver-resultados-btn" class="button">Ver Resultados</button>
+      <button id="volver-btn-top" class="button">Volver al Inicio</button> <!-- Botón en la parte superior -->
+    </div>
+
+    <div class="styled-form tabla-contenedor">
+      <div id="tablaContainer">
+        <table id="tabla-resultados" class="resultadosTotalesTable">
+          <thead>
+            <tr>
+              <th>Jugador</th>
+              <th>Resultados Pronosticados</th>
+              <th>Resultados Oficiales</th>
+              <th>Puntos Obtenidos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Aquí se insertarán dinámicamente las filas con JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      <button id="volver-btn-bottom" class="button" style="display:none;">Volver al Inicio</button> <!-- Botón en la parte inferior -->
+    </div>
+  </section>
+
+  <script src="/js/ver_resultados_totales_de_jugadores.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modo Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Bienvenidos a la Quiniela Deportiva</h1>
+    </header>
+    <main id="content">
+        <!-- Contenido visible solo para usuarios autenticados -->
+        <div id="admin-content" style="display: none;">
+            <h2>Contenido Administrador</h2>
+            <form id="menuForm">
+                <section id="menuPrincipal">
+                    <h2>Menú Principal</h2>
+                    <div class="menu-item">
+                        <a href="jugadores.html">Agregar Jugadores</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="jornadas.html">Agregar Jornada</a>
+                    </div>                        
+                    <div class="menu-item">
+                        <a href="resultados.html">Agregar Resultados por Jugador</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="verResultados.html">Ver Resultados Pronosticados por Jugador</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="verResultados_puntos.html">Ver Resultados Pronosticados y Puntos obtenidos por Jugador</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="agregar-resultados-oficiales.html">Agregar Resultados Oficiales a Jornada</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="ver-resultados-oficiales.html">Ver Resultados Oficiales</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="resultados-totales.html">Ver Resultados Totales</a>
+                    </div>    
+                    <div class="menu-item">
+                        <a href="generar_reporte.html">Generar Reporte</a>
+                    </div>                                                                       
+                </section>
+            </form>
+            <form id="logoutForm">
+                <button type="submit">Cerrar sesión</button>
+            </form>
+        </div>
+        <!-- Contenido visible para todos los usuarios no autenticados -->
+        <div id="guest-content">            
+            <form id="menuForm">
+                <section id="menuPrincipal">
+                    <h2>Menú Principal</h2>                    
+                    <div class="menu-item">
+                        <a href="ver_jugadores.html">Ver Jugadores</a>
+                    </div>                                        
+                    <div class="menu-item">
+                        <a href="ver_jornadas.html">Ver Jornadas</a>
+                    </div>                
+                    <div class="menu-item">
+                        <a href="verResultados.html">Ver Resultados Pronosticados por Jugador</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="verResultados_puntos.html">Ver Resultados Pronosticados y Puntos obtenidos por Jugador</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="ver-resultados-oficiales.html">Ver Resultados Oficiales</a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="resultados-totales.html">Ver Resultados Totales</a>
+                    </div>
+                </section>
+            </form>            
+        </div>
+    </main>
+    <script src="js/adminmode.js" defer></script>
+</body>
+</html>

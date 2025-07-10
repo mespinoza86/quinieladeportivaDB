@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Totales</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script defer src="js/resultados-totales.js"></script>
+    <style>
+        /* Estilos para mantener fija la columna del jugador y la columna del total */
+        #tablaContainer {
+            display: flex;
+            overflow-x: auto;
+        }
+
+        #resultadosTotalesTable {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #resultadosTotalesTable th, #resultadosTotalesTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        /* Mantener fija la primera columna y la última columna */
+        #resultadosTotalesTable thead th:first-child,
+        #resultadosTotalesTable tbody td:first-child,
+        #resultadosTotalesTable thead th:last-child,
+        #resultadosTotalesTable tbody td:last-child {
+            position: sticky;
+            background: #fff;
+            z-index: 2;
+        }
+
+        #resultadosTotalesTable thead th:first-child,
+        #resultadosTotalesTable tbody td:first-child {
+            left: 0;
+        }
+
+        #resultadosTotalesTable thead th:last-child,
+        #resultadosTotalesTable tbody td:last-child {
+            right: 0;
+        }
+
+        /* Estilo para el contenedor con scroll horizontal */
+        .scrollable-jornadas {
+            overflow-x: auto;
+            display: block;
+        }
+
+        /* Ajuste del ancho de las columnas */
+        #resultadosTotalesTable th,
+        #resultadosTotalesTable td {
+            min-width: 100px; /* Ajustar según sea necesario */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Resultados Totales</h1>
+    </header>
+    <main>
+        <button id="calcularResultados">Calcular Resultados</button>
+        <div id="tablaContainer">
+            <table id="resultadosTotalesTable">
+                <thead>
+                    <tr>
+                        <th>Jugador</th>
+                        <!-- Aquí se añadirán dinámicamente las cabeceras de las jornadas -->
+                        <!-- Mantendremos la columna de total al final -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se añadirán dinámicamente las filas con los resultados -->
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <button id="volverButton">Volver</button>
+    </main>
+    <footer>
+        <p>&copy; 2024 Quiniela Deportiva</p>
+    </footer>
+    <script>
+        // Redireccionar a la página principal (index.html) al hacer clic en el botón "Volver"
+        document.getElementById('volverButton').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

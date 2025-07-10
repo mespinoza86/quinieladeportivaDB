@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generar PDF con Resultados</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+  </style>
+</head>
+<body>
+
+<h1>Selecciona la Jornada</h1>
+<select id="jornadaSelect"></select>
+<button id="generarPdfBtn">Generar PDF con Resultados</button>
+
+<script type="module" src="/js/generar_reporte.js"></script>
+<footer>
+        <button onclick="window.location.href='index.html'">Volver</button>
+    </footer>
+</body>
+</html>

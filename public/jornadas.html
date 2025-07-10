@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Jornada</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/jornadas.js" defer></script>
+    <style>
+    .autocomplete-suggestions {
+        border: 1px solid #ddd;
+        max-height: 150px;
+        overflow-y: auto;
+        background-color: white;
+        position: absolute;
+        z-index: 1000;
+        display: none;
+    }
+    .autocomplete-suggestion {
+        padding: 5px;
+        cursor: pointer;
+    }
+    .autocomplete-suggestion:hover {
+        background-color: #f0f0f0;
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Agregar Jornada</h1>
+    </header>
+    <main>
+        <section id="jornadaSection">
+            <h2>Agregar Partido</h2>
+            <div>
+                <input type="text" id="equipo1Input" placeholder="Equipo 1" oninput="autocompleteEquipo(this, 'equipo1Suggestions')">
+                <div id="suggestions1" class="autocomplete-suggestions"></div>                
+
+                <span>vs</span>
+                <input type="text" id="equipo2Input" placeholder="Equipo 2" oninput="autocompleteEquipo(this, 'equipo2Suggestions')">
+                <div id="suggestions2" class="autocomplete-suggestions"></div>
+                <div>
+                    <label for="comodinCheckbox">Comodín:</label>
+                    <input type="checkbox" id="comodinCheckbox" name="comodin">
+                </div>
+                
+                <button id="addPartidoButton">Agregar Partido</button>
+            </div>
+            <ul id="partidosList"></ul>
+            <button id="finalizarJornadaButton">Finalizar Jornada</button>
+            <h2>Ver Jornadas</h2>
+            <select id="jornadaSelect"></select>
+            <ul id="partidosJornadaList"></ul>
+            <h2>Modificar Jornada</h2>
+            <select id="modificarJornadaSelect"></select>
+            <div id="modificarJornadaControls" style="display: none;">
+                <input type="text" id="modificarEquipo1Input" placeholder="Equipo 1">
+                <span>vs</span>
+                <input type="text" id="modificarEquipo2Input" placeholder="Equipo 2">
+                
+                <!-- Nuevo combobox para comodín -->
+                <label for="modificarComodinSelect">Comodín:</label>
+                <input type="checkbox" id="modificarComodinSelect" name="comodin">
+
+                <button id="agregarPartidoButton">Agregar Partido</button>
+                <ul id="partidosModificarList"></ul>
+                <button id="eliminarPartidosButton">Eliminar Partidos Seleccionados</button>
+            </div>
+            <button onclick="window.location.href='adminmode.html'">Volver</button>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Resultados por Jugador</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/resultados.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Agregar Resultados por Jugador</h1>
+    </header>
+    <main>
+        <section id="resultadosSection">
+            <form id="resultadosForm" style="display: flex; flex-direction: column; align-items: center;">
+                <h2>Agregar Resultados</h2>
+                <label for="jugadorSelect">Jugador:</label>
+                <select id="jugadorSelect"></select>
+
+                <label for="jornadaSelect">Jornada:</label>
+                <select id="jornadaSelect"></select>
+
+                <button id="addResultadosButton" type="button">Agregar Resultados</button>
+                <button id="pegarResultadosButton" type="button">Pegar Resultados</button> <!-- Nuevo botón -->
+
+                <div id="partidosContainer"></div>
+
+                <button id="saveResultadosButton" type="button">Guardar Resultados</button>                
+            </form>
+        </section>
+    </main>
+    <footer> 
+        <button onclick="window.location.href='adminmode.html'">Volver</button>       
+    </footer>
+</body>
+</html>

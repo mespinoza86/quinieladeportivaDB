@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Jugadores</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/jugadores.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Agregar Jugadores</h1>
+    </header>
+    <main>
+        <section id="jugadoresSection">
+            <h2>Agregar Jugador</h2>
+            <input type="text" id="nombreInput" placeholder="Nombre del jugador">
+            <button id="addJugadorButton">Agregar Jugador</button>
+            <h2>Lista de Jugadores</h2>
+            <ul id="jugadoresList"></ul>
+            <h2>Eliminar Jugador</h2>
+            <select id="eliminarJugadorSelect"></select>
+            <button id="deleteJugadorButton">Eliminar Jugador</button>
+            <button onclick="window.location.href='adminmode.html'">Volver</button>
+        </section>        
+    </main>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Jugadores</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/ver_jugadores.js" defer></script>
+    <style>
+        /* Estilos para centrar el contenido */
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc; /* Añade un borde */
+            border-radius: 10px; /* Bordes redondeados */
+            background-color: #f9f9f9; /* Fondo claro */
+        }
+        ul, button {
+            width: 100%; /* Ajusta el ancho de los elementos */
+            margin: 10px 0; /* Añade un margen vertical entre los elementos */
+        }
+        button {
+            width: auto; /* Ajusta el ancho del botón */
+            align-self: center; /* Centra el botón dentro del contenedor flex */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ver Jugadores</h1>
+    </header>
+    <main>
+        <section id="verJugadoresSection" class="form-container">
+            <h2>Lista de Jugadores</h2>
+            <!-- Cambiar aquí el ID de jugadoresList a listaJugadores -->
+            <ul id="listaJugadores"></ul>
+            <button onclick="window.location.href='index.html'">Volver</button>
+        </section>
+    </main>
+</body>
+</html>
