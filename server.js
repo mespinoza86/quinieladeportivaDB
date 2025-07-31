@@ -345,8 +345,22 @@ app.get('/api/resultados-totales', async (req, res) => {
 
         const esComodin = o.comodin;
 
-        if (rOf === rPr) puntosJornada += esComodin ? 4 : 3;
-        if (o.marcador1 === p.marcador1 && o.marcador2 === p.marcador2) puntosJornada += esComodin ? 3 : 2;
+	
+if (o.marcador1 === p.marcador1 && o.marcador2 === p.marcador2) {
+  puntosJornada += esComodin ? 7 : 5;
+} else {
+  const resultado = (m1, m2) => m1 > m2 ? 'gano' : m1 < m2 ? 'perdio' : 'empato';
+  const rOf = resultado(o.marcador1, o.marcador2);
+  const rPr = resultado(p.marcador1, p.marcador2);
+
+  if (rOf === rPr) puntosJornada += esComodin ? 4 : 3;
+}
+
+
+
+
+//        if (rOf === rPr) puntosJornada += esComodin ? 4 : 3;
+//        if (o.marcador1 === p.marcador1 && o.marcador2 === p.marcador2) puntosJornada += esComodin ? 3 : 2;
       });
 
       resultadosTotales[j.nombre][jornada.nombre] = puntosJornada;
