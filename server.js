@@ -311,6 +311,7 @@ app.get('/api/resultados-con-equipos/:jugador/:jornada', async (req, res) => {
 });
 
 /* ======== API: Resultados Totales ======== */
+
 app.get('/api/resultados-totales', async (req, res) => {
   const jugadores = await Jugador.find({});
   const jornadas = await Jornada.find({});
@@ -324,9 +325,14 @@ app.get('/api/resultados-totales', async (req, res) => {
   oficiales.forEach(r => mapOficial.set(r.jornada, r.resultados));
 
   const resultadosTotales = {};
+
+  // ✅ Función auxiliar definida una sola vez
+  const resultado = (m1, m2) => m1 > m2 ? 'gano' : m1 < m2 ? 'perdio' : 'empato';
+
   for (let j of jugadores) {
     let totalPuntos = 0;
     resultadosTotales[j.nombre] = {};
+
     for (let jornada of jornadas) {
       const key = `${j.nombre}_${jornada.nombre}`;
       const pronosticos = mapRes.get(key) || [];
@@ -337,40 +343,40 @@ app.get('/api/resultados-totales', async (req, res) => {
       jornada.partidos.forEach((partido, index) => {
         const p = pronosticos[index];
         const o = oficialesJornada[index];
-        if (!o || !p) return;
+        if (!p || !o) return;
 
-        const resultado = (m1, m2) => m1 > m2 ? 'gano' : m1 < m2 ? 'perdio' : 'empato';
-        const rOf = resultado(o.marcador1, o.marcador2);
-        const rPr = resultado(p.marcador1, p.marcador2);
+        // ✅ Validar que todos los marcadores sean números válidos
+        const valores = [o.marcador1, o.marcador2, p.marcador1, p.marcador2];
+        const sonNumerosValidos = valores.every(val => typeof val === 'number' && !isNaN(val));
+
+        if (!sonNumerosValidos) return; // ❌ Ignorar este partido si hay algún marcador inválido
 
         const esComodin = o.comodin;
 
-	
-if (o.marcador1 === p.marcador1 && o.marcador2 === p.marcador2) {
-  puntosJornada += esComodin ? 7 : 5;
-} else {
-  const resultado = (m1, m2) => m1 > m2 ? 'gano' : m1 < m2 ? 'perdio' : 'empato';
-  const rOf = resultado(o.marcador1, o.marcador2);
-  const rPr = resultado(p.marcador1, p.marcador2);
+        if (o.marcador1 === p.marcador1 && o.marcador2 === p.marcador2) {
+          puntosJornada += esComodin ? 7 : 5;
+        } else {
+          const rOf = resultado(o.marcador1, o.marcador2);
+          const rPr = resultado(p.marcador1, p.marcador2);
+          if (rOf === rPr) puntosJornada += esComodin ? 4 : 3;
+        }
 
-  if (rOf === rPr) puntosJornada += esComodin ? 4 : 3;
-}
-
-
-
-
+        
 //        if (rOf === rPr) puntosJornada += esComodin ? 4 : 3;
 //        if (o.marcador1 === p.marcador1 && o.marcador2 === p.marcador2) puntosJornada += esComodin ? 3 : 2;
+
       });
 
       resultadosTotales[j.nombre][jornada.nombre] = puntosJornada;
       totalPuntos += puntosJornada;
     }
+
     resultadosTotales[j.nombre].total = totalPuntos;
   }
 
   res.json(resultadosTotales);
 });
+
 
 app.get('/generar_reporte', (req, res) => {
   res.sendFile(path.join(__dirname,'public', 'generar_reporte.html'));
