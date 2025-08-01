@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    const jornadaSeleccionada = 6;
+    const jornadaSeleccionada = 2;
     //const jornadaSeleccionada = localStorage.getItem('jornadaSeleccionada');
     
     if (jornadaSeleccionada !== null) {
