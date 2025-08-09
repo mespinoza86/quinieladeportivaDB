@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    const jornadaSeleccionada = 2;
-    //const jornadaSeleccionada = localStorage.getItem('jornadaSeleccionada');
-    
+    //const jornadaSeleccionada = 2;
+    const jornadaSeleccionada = localStorage.getItem('jornadaSeleccionada');
+     
     if (jornadaSeleccionada !== null) {
         loadPartidos(jornadaSeleccionada);
     }
