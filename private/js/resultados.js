@@ -174,9 +174,9 @@ function updateScoreInputs(resultados) {
             const input2 = div.querySelector(`#resultado${index}_2`);
             pronosticos.push({
                 equipo1: partidos[index].equipo1,
-                marcador1: input1.value,
+                marcador1: input1.value === '' ? null : Number(input1.value),
                 equipo2: partidos[index].equipo2,
-                marcador2: input2.value
+                marcador2: input2.value === '' ? null : Number(input2.value)
             });
         });
 

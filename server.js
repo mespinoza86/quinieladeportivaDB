@@ -237,8 +237,8 @@ app.get('/api/resultados-oficiales/:jornada', async (req, res) => {
     return {
       equipo1: p.equipo1,
       equipo2: p.equipo2,
-      marcador1: r?.marcador1 ?? '',
-      marcador2: r?.marcador2 ?? '',
+      marcador1: r?.marcador1 !== undefined && r?.marcador1 !== null ? r.marcador1 : '',
+      marcador2: r?.marcador2 !== undefined && r?.marcador2 !== null ? r.marcador2 : '',
       comodin: p.comodin
     };
   });
