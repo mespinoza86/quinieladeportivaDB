@@ -1,11 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Recuperar la jornada seleccionada de localStorage
 
-const jornadaSeleccionada = localStorage.getItem('jornadaSeleccionada');
+    fetch('/api/jornadas')
+        .then(response => response.json())
+        .then(data => {
+            if (!data || data.length === 0) {
+                console.error("No hay jornadas disponibles");
+                return;
+            }
 
-if (jornadaSeleccionada !== null) {
-    loadPartidos(jornadaSeleccionada); // ya no usamos parseInt
-}
+            // Seleccionamos la última jornada
+            const ultimaJornada = data[data.length - 1][0]; // [0] es el nombre de la jornada
+            loadPartidos(ultimaJornada);
+        })
+        .catch(error => console.error('Error al cargar las jornadas:', error));
+
     // Botones
     const copiarTextoButton = document.getElementById('copiarTextoButton');
     copiarTextoButton.addEventListener('click', copiarResultados);
@@ -16,6 +25,7 @@ if (jornadaSeleccionada !== null) {
 
 // Cargar los partidos de una jornada
 
+// Cargar los partidos de una jornada
 function loadPartidos(nombreJornada) {
     fetch('/api/jornadas')
         .then(response => response.json())
