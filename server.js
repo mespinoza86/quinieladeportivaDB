@@ -54,14 +54,19 @@ mongoose.connect(process.env.MONGO_URI)
 
 /* ======== Esquemas de Mongoose ======== */
 const JugadorSchema = new mongoose.Schema({ nombre: String });
+
 const JornadaSchema = new mongoose.Schema({
   nombre: String,
   partidos: [{
     equipo1: String,
     equipo2: String,
     comodin: { type: Boolean, default: false }
-  }]
+  }],
+  fechaCierre: { type: Date, required: false } // 🆕 campo opcional
 });
+
+
+
 const ResultadoSchema = new mongoose.Schema({
   jugador: String,
   jornada: String,
@@ -152,18 +157,38 @@ app.delete('/api/jugadores/:nombre', async (req, res) => {
 /* ======== API: Jornadas ======== */
 app.get('/api/jornadas', async (req, res) => {
   const jornadas = await Jornada.find({});
-  res.json(jornadas.map(j => [j.nombre, j.partidos]));
+  res.json(jornadas.map(j => ({
+    nombre: j.nombre,
+    partidos: j.partidos,
+    fechaCierre: j.fechaCierre || null
+  })));
 });
+
 app.get('/api/jornadas/:nombre', async (req, res) => {
   const jornada = await Jornada.findOne({ nombre: req.params.nombre });
-  jornada ? res.json(jornada.partidos) : res.status(404).json({ error: 'Jornada no encontrada.' });
+  if (!jornada) return res.status(404).json({ error: 'Jornada no encontrada.' });
+  res.json({
+    nombre: jornada.nombre,
+    partidos: jornada.partidos,
+    fechaCierre: jornada.fechaCierre || null
+  });
 });
+
+
 app.post('/api/jornadas', async (req, res) => {
-  const { nombre, partidos } = req.body;
-  await Jornada.findOneAndUpdate({ nombre }, { partidos }, { upsert: true });
+  const { nombre, partidos, fechaCierre } = req.body;
+  await Jornada.findOneAndUpdate(
+    { nombre },
+    { partidos, ...(fechaCierre && { fechaCierre }) }, // solo agrega fecha si viene
+    { upsert: true }
+  );
   const jornadas = await Jornada.find({});
   res.json(jornadas.map(j => [j.nombre, j.partidos]));
 });
+
+
+
+
 app.post('/api/jornadas/agregar-partido', async (req, res) => {
   const { jornada, partido } = req.body;
   const doc = await Jornada.findOne({ nombre: jornada });
@@ -213,37 +238,66 @@ app.get('/api/resultados/:jugador/:jornada', async (req, res) => {
 /* ======== API: Resultados Oficiales ======== */
 app.get('/api/resultados-oficiales', async (req, res) => {
   const all = await ResultadoOficial.find({});
-  const resultMap = new Map();
-  all.forEach(r => resultMap.set(r.jornada, r.resultados));
-  res.json(Array.from(resultMap.entries()));
+  const resultados = all.map(r => ({
+    nombre: r.jornada,
+    partidos: r.resultados
+  }));
+  res.json(resultados);
 });
+
 app.post('/api/resultados-oficiales', async (req, res) => {
   const { jornada, resultados } = req.body;
   await ResultadoOficial.findOneAndUpdate({ jornada }, { resultados }, { upsert: true });
   const all = await ResultadoOficial.find({});
-  const resultMap = new Map();
-  all.forEach(r => resultMap.set(r.jornada, r.resultados));
-  res.json(Array.from(resultMap.entries()));
+  const resultadosArray = all.map(r => ({
+    nombre: r.jornada,
+    partidos: r.resultados
+  }));
+  res.json(resultadosArray);
 });
+
+
+
+
 app.get('/api/resultados-oficiales/:jornada', async (req, res) => {
-  const jornada = req.params.jornada;
-  const jornadaDoc = await Jornada.findOne({ nombre: jornada });
-  const oficial = await ResultadoOficial.findOne({ jornada });
-  if (!jornadaDoc) return res.status(404).json({ error: 'Jornada no encontrada' });
-  const partidos = jornadaDoc.partidos;
-  const resultadosExistentes = oficial ? oficial.resultados : [];
-  const partidosConResultados = partidos.map(p => {
-    const r = resultadosExistentes.find(r => r.equipo1 === p.equipo1 && r.equipo2 === p.equipo2);
-    return {
-      equipo1: p.equipo1,
-      equipo2: p.equipo2,
-      marcador1: r?.marcador1 !== undefined && r?.marcador1 !== null ? r.marcador1 : '',
-      marcador2: r?.marcador2 !== undefined && r?.marcador2 !== null ? r.marcador2 : '',
-      comodin: p.comodin
-    };
-  });
-  res.json({ jornada, partidos: partidosConResultados });
+  try {
+    const jornadaNombre = req.params.jornada;
+
+    // Buscamos la jornada
+    const jornadaDoc = await Jornada.findOne({ nombre: jornadaNombre });
+    if (!jornadaDoc) {
+      return res.status(404).json({ error: 'Jornada no encontrada' });
+    }
+
+    // Obtenemos los resultados oficiales
+    const oficial = await ResultadoOficial.findOne({ jornada: jornadaNombre });
+    const resultadosExistentes = oficial ? oficial.resultados : [];
+
+    // Construimos los partidos con resultados
+    const partidosConResultados = jornadaDoc.partidos.map(p => {
+      const r = resultadosExistentes.find(r => r.equipo1 === p.equipo1 && r.equipo2 === p.equipo2);
+      return {
+        equipo1: p.equipo1,
+        equipo2: p.equipo2,
+        marcador1: r?.marcador1 != null ? r.marcador1 : '',
+        marcador2: r?.marcador2 != null ? r.marcador2 : '',
+        comodin: p.comodin
+      };
+    });
+
+    // Respondemos en el formato que espera el frontend
+    res.json({
+      nombre: jornadaNombre,
+      partidos: partidosConResultados
+    });
+
+  } catch (error) {
+    console.error('Error al obtener resultados oficiales de la jornada:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
+
+
 
 // Obtener equipos (todos los documentos Equipo)
 app.get('/api/equipos', async (req, res) => {

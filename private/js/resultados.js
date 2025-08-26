@@ -23,18 +23,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Función para cargar las jornadas desde la API
-    function loadJornadas() {
-        fetch('/api/jornadas')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(([nombre]) => {
-                    const option = document.createElement('option');
-                    option.value = nombre;
-                    option.textContent = nombre;
-                    jornadaSelect.appendChild(option);
-                });
+
+function loadJornadas() {
+    fetch('/api/jornadas')
+        .then(response => response.json())
+        .then(data => {
+            // Limpiar el select antes de agregar opciones
+            jornadaSelect.innerHTML = '';
+
+            data.forEach(item => {
+                // Asegúrate de tomar la propiedad correcta que contiene el nombre
+                const nombreJornada = item.nombre || item[0] || item;
+
+                const option = document.createElement('option');
+                option.value = nombreJornada;
+                option.textContent = nombreJornada;
+                jornadaSelect.appendChild(option);
             });
-    }
+        })
+        .catch(err => {
+            console.error('Error al cargar las jornadas:', err);
+        });
+}
+
 
     // Función para cargar los resultados previos de un jugador en una jornada
     function loadResultadosPrevios(jugador, jornada) {
@@ -64,15 +75,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Función para cargar los partidos de una jornada
-    function cargarPartidos(jugador, jornada) {
-        fetch(`/api/jornadas`)
-            .then(response => response.json())
-            .then(data => {
-                const partidosData = data.find(([nombre]) => nombre === jornada)[1];
-                partidos = partidosData; // Guardar partidos para referencia futura
-                loadResultadosPrevios(jugador, jornada);
-            });
-    }
+function cargarPartidos(jugador, jornada) {
+    fetch(`/api/jornadas`)
+        .then(response => response.json())
+        .then(data => {
+            // Buscar la jornada correcta como objeto
+            const jornadaObj = data.find(j => j.nombre === jornada);
+            if (!jornadaObj) {
+                console.error("Jornada no encontrada:", jornada);
+                return;
+            }
+            partidos = jornadaObj.partidos; // Guardar partidos
+            loadResultadosPrevios(jugador, jornada);
+        });
+}
 
     // Evento al hacer clic en "Añadir Resultados"
     addResultadosButton.addEventListener('click', () => {

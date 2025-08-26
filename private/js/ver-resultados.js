@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (Array.isArray(data)) {
                     jornadaSelect.innerHTML = '<option value="">Selecciona una jornada</option>';
-                    data.forEach(([nombre]) => {
+                    data.forEach(jornada => {
                         const option = document.createElement('option');
-                        option.value = nombre; // Usa el nombre de la jornada directamente
-                        option.textContent = nombre; // Muestra el nombre de la jornada
+                        option.value = jornada.nombre;   // ahora usamos la propiedad del objeto
+                        option.textContent = jornada.nombre;
                         jornadaSelect.appendChild(option);
                     });
                 } else {

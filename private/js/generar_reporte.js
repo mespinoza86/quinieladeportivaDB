@@ -12,18 +12,19 @@
       .trim();
   }
 
-  async function cargarJornadas() {
-    const res = await fetch('/api/jornadas');
-    const jornadas = await res.json();
-    jornadaSelect.innerHTML = '';
-    jornadas.forEach(j => {
-      const jornadaNombre = Array.isArray(j) ? j[0] : j;
-      const opt = document.createElement('option');
-      opt.value = jornadaNombre;
-      opt.textContent = jornadaNombre;
-      jornadaSelect.appendChild(opt);
-    });
-  }
+async function cargarJornadas() {
+  const res = await fetch('/api/jornadas');
+  const jornadas = await res.json();
+  jornadaSelect.innerHTML = '';
+  jornadas.forEach(j => {
+    // Suponiendo que j = { nombre: "Jornada 1" }
+    const jornadaNombre = j.nombre; 
+    const opt = document.createElement('option');
+    opt.value = jornadaNombre;
+    opt.textContent = jornadaNombre;
+    jornadaSelect.appendChild(opt);
+  });
+}
 
   async function cargarJugadores() {
     const res = await fetch('/api/jugadores');
@@ -131,13 +132,14 @@
     const resultados = await cargarResultados();
     const resultadosOficiales = await cargarResultadosOficiales();
 
-    const jornadaOficial = resultadosOficiales.find(j => j[0] === jornadaSeleccionada);
+    const jornadaOficial = resultadosOficiales.find(j => j.nombre === jornadaSeleccionada);
+
     if (!jornadaOficial) {
       alert('No se encontraron resultados oficiales para la jornada');
       return;
     }
 
-    const partidosOficial = jornadaOficial[1];
+    const partidosOficial = jornadaOficial ? jornadaOficial.partidos : null;
 
     const doc = new jsPDF();
     doc.setFont("times", "normal");

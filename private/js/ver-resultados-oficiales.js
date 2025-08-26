@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/jornadas')
         .then(response => response.json())
         .then(jornadas => {
-            jornadaSelect.innerHTML = jornadas.map(([nombre]) => `<option value="${nombre}">${nombre}</option>`).join('');
+            // Suponiendo que jornadas = [{ nombre: "Jornada 1" }, ...]
+            jornadaSelect.innerHTML = jornadas.map(j => `<option value="${j.nombre}">${j.nombre}</option>`).join('');
         });
 
     searchResultadosOficialesButton.addEventListener('click', () => {
@@ -15,9 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(`/api/resultados-oficiales`)
             .then(response => response.json())
             .then(resultadosOficiales => {
-                const resultados = resultadosOficiales.find(([nombre]) => nombre === jornada);
-                if (resultados) {
-                    resultadosOficialesContainer.innerHTML = resultados[1].map(partido => `
+                // Suponiendo que resultadosOficiales = [{ nombre: "Jornada 1", partidos: [...] }, ...]
+                const resultados = resultadosOficiales.find(r => r.nombre === jornada);
+                if (resultados && resultados.partidos) {
+                    resultadosOficialesContainer.innerHTML = resultados.partidos.map(partido => `
                         <div class="resultado">
                             <span>${partido.equipo1} ${partido.marcador1} - ${partido.equipo2} ${partido.marcador2}</span>
                         </div>

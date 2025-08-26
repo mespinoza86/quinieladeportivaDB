@@ -58,8 +58,8 @@ function mostrarResultados(jornada, resultadosData, oficialesData) {
     const resultadosJornada = resultadosData.filter(jugador => jugador[0].includes(jornada));
 
     // Obtener resultados oficiales para la jornada
-    const resultadoOficialJornada = oficialesData.find(oficial => oficial[0] === jornada);
-    const resultadosOficiales = resultadoOficialJornada ? resultadoOficialJornada[1] : [];
+    const resultadoOficialJornada = oficialesData.find(oficial => oficial.nombre === jornada);
+    const resultadosOficiales = resultadoOficialJornada ? resultadoOficialJornada.partidos : [];
 
     // Obtener partidos de la jornada para asociar equipos
     obtenerPartidosJornada(jornada).then(partidos => {
@@ -72,7 +72,7 @@ function mostrarResultados(jornada, resultadosData, oficialesData) {
             const pronosticos = jugadorResultados[1]; // Array de pronósticos para la jornada
 
             pronosticos.forEach((pronostico, index) => {
-                const partido = partidos[index]; // Partido de la jornada correspondiente al índice
+                const partido = partidos.partidos[index];// Partido de la jornada correspondiente al índice
                 if (!partido) return;
 
                 const partidoClave = `${partido.equipo1} vs ${partido.equipo2}`;

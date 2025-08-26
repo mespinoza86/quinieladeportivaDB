@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar jornadas en el combo box
     fetch('/api/jornadas')
         .then(response => response.json())
-        .then(jornadas => {
-            jornadaSelect.innerHTML = jornadas.map(([nombre]) => `<option value="${nombre}">${nombre}</option>`).join('');
+        .then(jornadas => {            
+            jornadaSelect.innerHTML = jornadas.map(jornada => `<option value="${jornada.nombre}">${jornada.nombre}</option>`).join('');
         });
 
     addResultadosOficialesButton.addEventListener('click', () => {

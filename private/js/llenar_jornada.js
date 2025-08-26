@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Recuperar la jornada seleccionada de localStorage
 
-    fetch('/api/jornadas')
+     fetch('/api/jornadas')
         .then(response => response.json())
         .then(data => {
             if (!data || data.length === 0) {
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Seleccionamos la última jornada
-            const ultimaJornada = data[data.length - 1][0]; // [0] es el nombre de la jornada
+            const ultimaJornada = data[data.length - 1].nombre; // ahora es un objeto
             loadPartidos(ultimaJornada);
         })
         .catch(error => console.error('Error al cargar las jornadas:', error));
@@ -30,28 +30,39 @@ function loadPartidos(nombreJornada) {
     fetch('/api/jornadas')
         .then(response => response.json())
         .then(data => {
-            const jornada = data.find(j => j[0] === nombreJornada); // busca por nombre
+            const jornada = data.find(j => j.nombre === nombreJornada); // busca por nombre
             if (!jornada) {
                 console.error("Jornada no encontrada:", nombreJornada);
                 return;
             }
-            const [nombre, partidos] = jornada;
-            mostrarPartidos(partidos);
+
+            // jornada ahora es un objeto { nombre, partidos, fechaCierre }
+            mostrarPartidos(jornada.partidos, jornada.fechaCierre);
         })
         .catch(error => console.error('Error al cargar los partidos:', error));
 }
 
-// Mostrar los partidos en pantalla
-function mostrarPartidos(partidos) {
-    const partidosContainer = document.getElementById('partidosContainer');
-    partidosContainer.innerHTML = ''; 
 
-    partidos.forEach((partido, i) => {
-        const partidoDiv = document.createElement('div');
-        partidoDiv.classList.add('partido-container');
-        
-        // Si es comodín, lo marcamos en negrita
-        const estiloNegrita = partido.comodin ? 'font-weight: bold;' : '';
+    // Mostrar los partidos en pantalla
+    // Mostrar los partidos en pantalla
+    function mostrarPartidos(partidos, fechaCierre) {
+        const partidosContainer = document.getElementById('partidosContainer');
+        partidosContainer.innerHTML = ''; 
+
+        // Mostrar fecha de cierre si existe
+        if (fechaCierre) {
+            const fecha = new Date(fechaCierre);
+            const fechaDiv = document.createElement('div');
+            fechaDiv.textContent = `Cierra el: ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            fechaDiv.style.marginBottom = "10px";
+            partidosContainer.appendChild(fechaDiv);
+        }
+
+        partidos.forEach((partido, i) => {
+            const partidoDiv = document.createElement('div');
+            partidoDiv.classList.add('partido-container');
+            
+            const estiloNegrita = partido.comodin ? 'font-weight: bold;' : '';
         
         partidoDiv.innerHTML = `
             <label style="${estiloNegrita}">${partido.equipo1}</label>
@@ -64,6 +75,8 @@ function mostrarPartidos(partidos) {
         partidosContainer.appendChild(partidoDiv);
     });
 }
+
+
 
 
 // Copiar resultados al portapapeles
