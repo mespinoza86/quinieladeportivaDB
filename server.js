@@ -8,6 +8,8 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const bcrypt = require('bcrypt');
+const SALT_ROUNDS = 10;
 
 // Middleware
 app.use(express.json());
@@ -53,7 +55,11 @@ mongoose.connect(process.env.MONGO_URI)
   });
 
 /* ======== Esquemas de Mongoose ======== */
-const JugadorSchema = new mongoose.Schema({ nombre: String });
+const JugadorSchema = new mongoose.Schema({
+    nombre: { type: String, required: true, unique: true },
+    password: { type: String } // opcional al principio
+});
+
 
 const JornadaSchema = new mongoose.Schema({
   nombre: String,
@@ -138,21 +144,61 @@ app.get('/check-auth', (req, res) => res.json({ authenticated: req.session.authe
 app.get('/js/ver_resultados_totales_de_jugadores.js', (req, res) => res.sendFile(path.join(__dirname,'public', 'js', 'ver_resultados_totales_de_jugadores.js')));
 
 /* ======== API: Jugadores ======== */
-app.get('/api/jugadores', async (req, res) => {
-  const jugadores = await Jugador.find({});
+app.get('/api/jugadores', async (req, res) => {  
+  const jugadores = await Jugador.find({}).sort({ nombre: 1 });
   res.json(jugadores.map(j => j.nombre));
 });
+
 app.post('/api/jugadores', async (req, res) => {
-  const nuevo = new Jugador({ nombre: req.body.nombre });
-  await nuevo.save();
-  const jugadores = await Jugador.find({});
-  res.json(jugadores.map(j => j.nombre));
+    const { nombre, password } = req.body;
+    const existe = await Jugador.findOne({ nombre });
+    
+    if (existe) return res.status(400).json({ error: 'Jugador ya existe' });
+
+
+    if (!nombre || !password) {
+        return res.status(400).json({ error: 'Nombre y contraseña obligatorios' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const nuevo = new Jugador({ nombre, password: hashedPassword });
+    await nuevo.save();
+
+    const jugadores = await Jugador.find({});
+    res.json(jugadores.map(j => ({ nombre: j.nombre }))); // no enviamos contraseña
 });
+
 app.delete('/api/jugadores/:nombre', async (req, res) => {
-  await Jugador.deleteOne({ nombre: req.params.nombre });
-  const jugadores = await Jugador.find({});
-  res.json(jugadores.map(j => j.nombre));
+  try {
+    await Jugador.deleteOne({ nombre: req.params.nombre });
+    res.json({ message: 'Jugador eliminado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar jugador' });
+  }
 });
+
+
+
+app.post('/api/jugadores/:nombre/cambiar-password', async (req, res) => {
+    const { nombre } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    const jugador = await Jugador.findOne({ nombre });
+    if (!jugador) return res.status(404).json({ error: 'Jugador no encontrado' });
+
+    // Si el jugador tiene contraseña, verificar
+    if (jugador.password) {
+        const match = await bcrypt.compare(currentPassword, jugador.password);
+        if (!match) return res.status(400).json({ message: 'Contraseña actual incorrecta' });
+    }
+
+    // Guardar nueva contraseña
+    jugador.password = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await jugador.save();
+    res.json({ message: 'Contraseña cambiada correctamente' });
+});
+
 
 /* ======== API: Jornadas ======== */
 app.get('/api/jornadas', async (req, res) => {
