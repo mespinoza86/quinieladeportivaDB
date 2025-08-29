@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Guardamos el nombre de la jornada
             const jornadaSeleccionada = jornadaSelect.options[selectedIndex].textContent;
             localStorage.setItem('jornadaSeleccionada', jornadaSeleccionada);
-            window.location.href = 'llenar_jornada.html';
+            window.location.href = 'llenar_jornada_user.html';
         }
     });
 });

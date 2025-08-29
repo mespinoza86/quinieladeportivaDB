@@ -178,6 +178,31 @@ app.delete('/api/jugadores/:nombre', async (req, res) => {
   }
 });
 
+// Ver datos de un jugador (incluye si tiene password o no)
+app.get('/api/jugador/:nombre', async (req, res) => {
+    const jugador = await Jugador.findOne({ nombre: req.params.nombre });
+    if (!jugador) return res.status(404).json({ error: 'Jugador no encontrado' });
+    res.json({ nombre: jugador.nombre, password: jugador.password ? true : false });
+});
+
+
+app.post('/api/jugadores/:nombre/verificar-password', async (req, res) => {
+    const { password } = req.body;
+
+    const jugador = await Jugador.findOne({ nombre: req.params.nombre });
+    if (!jugador) return res.status(404).json({ error: 'Jugador no encontrado' });
+    if (!jugador.password) return res.status(400).json({ error: 'Jugador no tiene contraseña' });
+
+    // Comparar directamente la contraseña en texto plano con el hash guardado
+    const match = await bcrypt.compare(password, jugador.password);    
+
+    if (match) {    
+      return res.json({ success: true }); // asegurarte de hacer return
+    } else {    
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
+
+});
 
 
 app.post('/api/jugadores/:nombre/cambiar-password', async (req, res) => {

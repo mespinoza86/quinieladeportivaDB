@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llenar Jornada</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/llenar_jornada_user.js" defer></script>
+    <style>
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        .partido-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+        }
+        label, input, select {
+            margin: 0 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Llenar Jornada</h1>
+    </header>
+    <main>
+<section id="llenarJornadaSection" class="form-container">
+    <h2>Partidos de la Jornada</h2>
+
+    <!-- Contenedor dinámico para hora de cierre, reloj y contador -->
+    <div id="infoCierreContainer"></div>
+
+    <!-- Nuevo combo para seleccionar el jugador -->
+    <div class="nombre-jugador">
+        <label for="comboJugadores">Nombre del jugador:</label>
+        <select id="comboJugadores">
+            <option value="">Cargando jugadores...</option>
+        </select>
+    </div>
+
+    <label>*** Los partidos en negrita son los comodines</label> 
+    <div id="partidosContainer"></div>
+
+    <div class="button-container">                
+        <button onclick="window.location.href='ver_jornadas.html'">Volver</button>
+        <button id="copiarTextoButton">Copiar en Texto</button>
+        <button id="enviarWhatsappButton">Enviar por WhatsApp</button>
+        <button id="guardarResultadosButton">Guardar Resultados</button>
+    </div>
+</section>
+
+    </main>
+</body>
+</html>
+
