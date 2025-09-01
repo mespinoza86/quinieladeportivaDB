@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Copiar Resultados</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    select, button { padding: 5px 10px; margin: 5px 0; }
+    #resultados { white-space: pre; margin-top: 20px; background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+  <h2>Copiar Resultados de Jornada</h2>
+  
+  <label for="comboJornadas">Selecciona Jornada:</label>
+  <select id="comboJornadas">
+    <option value="">-- Selecciona --</option>
+  </select>
+
+  <button id="btnCopiar">Copiar Resultados</button>
+  <button id="btnWhatsapp">Enviar por WhatsApp</button>
+
+  <pre id="resultados"></pre>
+
+  <script src="js/enviarresultados.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <footer>
+        <button onclick="window.location.href='index.html'">Volver</button>
+    </footer>
+</body>
+</html>

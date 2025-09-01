@@ -46,32 +46,64 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error al cargar jornadas:', error));
     }
 
-    // Validar marcador: no null/undefined, no string vacío и numérico válido
+    // Función para mostrar modal y capturar contraseña
+function pedirPassword() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("passwordModal");
+        const input = document.getElementById("passwordInput");
+        const okBtn = document.getElementById("passwordOk");
+        const cancelBtn = document.getElementById("passwordCancel");
+
+        modal.style.display = "flex"; // mostrar modal
+        input.value = "";
+        input.focus();
+
+        function cerrar(valor) {
+            modal.style.display = "none";
+            okBtn.removeEventListener("click", aceptar);
+            cancelBtn.removeEventListener("click", cancelar);
+            resolve(valor);
+        }
+
+        function aceptar() {
+            cerrar(input.value);
+        }
+
+        function cancelar() {
+            cerrar(null);
+        }
+
+        okBtn.addEventListener("click", aceptar);
+        cancelBtn.addEventListener("click", cancelar);
+
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") aceptar();
+        });
+    });
+}
+
+
+    // Validar marcador
     function isValidScore(v) {
         if (v === null || v === undefined) return false;
         if (typeof v === 'string' && v.trim() === '') return false;
-        // Number('') -> 0 pero ya lo hemos filtrado; convertimos y comprobamos finito
         const n = Number(v);
         return Number.isFinite(n);
     }
 
-    // Calcular puntos: NO puntuar si falta cualquier marcador (oficial o pronosticado)
+    // Calcular puntos
     function calcularPuntos(pronostico, resultadoOficial) {
-        // protección por si alguno es undefined/null
         if (!pronostico || !resultadoOficial) return 0;
-
         const m1p = pronostico.marcador1;
         const m2p = pronostico.marcador2;
         const m1o = resultadoOficial.marcador1;
         const m2o = resultadoOficial.marcador2;
         const comodin = Boolean(resultadoOficial.comodin);
 
-        // Si falta cualquiera de los 4 valores, no puntuar
         if (!isValidScore(m1p) || !isValidScore(m2p) || !isValidScore(m1o) || !isValidScore(m2o)) {
             return 0;
         }
 
-        // Convertir a número ya que están validados
         const n1p = Number(m1p);
         const n2p = Number(m2p);
         const n1o = Number(m1o);
@@ -79,15 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let puntos = 0;
 
-        // mismo ganador / empate
         const ganadorPron = n1p > n2p ? 1 : n1p < n2p ? -1 : 0;
-        const ganadorOfi  = n1o > n2o ? 1 : n1o < n2o ? -1 : 0;
-
+        const ganadorOfi = n1o > n2o ? 1 : n1o < n2o ? -1 : 0;
         if (ganadorPron === ganadorOfi) {
             puntos += comodin ? 4 : 3;
         }
 
-        // marcador exacto
         if (n1p === n1o && n2p === n2o) {
             puntos += comodin ? 3 : 2;
         }
@@ -105,82 +134,89 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetch(`/api/resultados-con-equipos/${encodeURIComponent(jugador)}/${encodeURIComponent(jornada)}`)
-            .then(response => {
-                if (!response.ok) throw new Error('No se pudo obtener pronósticos del jugador');
-                return response.json();
-            })
-            .then(partidos => {
-                resultadosContainer.innerHTML = '';
-                puntosContainer.innerHTML = '';
-                totalPuntosContainer.innerHTML = '';
+        // Función para pedir datos al backend
+        function fetchResultados(password = "") {
+            return fetch(`/api/resultados-seguros/${encodeURIComponent(jugador)}/${encodeURIComponent(jornada)}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password })
+            }).then(r => r.json());
+        }
 
-                if (!Array.isArray(partidos) || partidos.length === 0) {
-                    resultadosContainer.textContent = 'El jugador no ha pronosticado esta jornada.';
-                    return;
-                }
+        // Primer intento SIN contraseña
+        fetchResultados().then(data => {
+            if (!data.success && data.error === "Contraseña requerida") {
+                // Solo pedimos contraseña si el backend lo pide
+                return pedirPassword().then(password => {
+                if (!password) {
+                    resultadosContainer.textContent = "No se ingresó contraseña.";
+                return;
+            }
+        return fetchResultados(password);
+});
 
-                // obtener resultados oficiales para la jornada
-                fetch('/api/resultados-oficiales')
-                    .then(r => {
-                        if (!r.ok) throw new Error('No se pudo obtener resultados oficiales');
-                        return r.json();
-                    })
-                    .then(resultadosOficiales => {
-                        const resultadoOficial = (Array.isArray(resultadosOficiales))
-                            ? resultadosOficiales.find(j => j.nombre === jornada)
-                            : null;
-                        const partidosOficiales = resultadoOficial ? resultadoOficial.partidos : [];
 
-                        let totalPuntos = 0;
+            }
+            return data;
+        })
+        .then(data => {
+            if (!data || !data.success) {
+                resultadosContainer.textContent = data?.error || "Error al obtener resultados.";
+                return;
+            }
 
-                        partidos.forEach(partidoPronosticado => {
-                            const partidoDiv = document.createElement('div');
-                            partidoDiv.classList.add('resultado');
+            const partidos = data.partidos;
+            resultadosContainer.innerHTML = '';
+            puntosContainer.innerHTML = '';
+            totalPuntosContainer.innerHTML = '';
 
-                            const resultadoOficialCorrespondiente = partidosOficiales.find(partido =>
-                                partido.equipo1 === partidoPronosticado.equipo1 &&
-                                partido.equipo2 === partidoPronosticado.equipo2
-                            );
+            if (!Array.isArray(partidos) || partidos.length === 0) {
+                resultadosContainer.textContent = 'El jugador no ha pronosticado esta jornada.';
+                return;
+            }
 
-                            const puntos = calcularPuntos(partidoPronosticado, resultadoOficialCorrespondiente);
-                            totalPuntos += puntos;
+            // obtener resultados oficiales
+            fetch('/api/resultados-oficiales')
+                .then(r => r.json())
+                .then(resultadosOficiales => {
+                    const resultadoOficial = (Array.isArray(resultadosOficiales)) 
+                        ? resultadosOficiales.find(j => j.nombre === jornada) 
+                        : null;
+                    const partidosOficiales = resultadoOficial ? resultadoOficial.partidos : [];
 
-                            const oficialTexto = resultadoOficialCorrespondiente && isValidScore(resultadoOficialCorrespondiente.marcador1) && isValidScore(resultadoOficialCorrespondiente.marcador2)
-                                ? `${resultadoOficialCorrespondiente.marcador1}-${resultadoOficialCorrespondiente.marcador2}`
-                                : 'N/A';
+                    let totalPuntos = 0;
+                    partidos.forEach(partidoPronosticado => {
+                        const partidoDiv = document.createElement('div');
+                        partidoDiv.classList.add('resultado');
 
-                            partidoDiv.innerHTML = `
-                                ${partidoPronosticado.equipo1} ${partidoPronosticado.marcador1} - ${partidoPronosticado.marcador2} ${partidoPronosticado.equipo2}
-                                | Oficial: ${oficialTexto}
-                                | Puntos: ${puntos}
-                            `;
-                            resultadosContainer.appendChild(partidoDiv);
-                        });
+                        const resultadoOficialCorrespondiente = partidosOficiales.find(
+                            partido => partido.equipo1 === partidoPronosticado.equipo1 && partido.equipo2 === partidoPronosticado.equipo2
+                        );
 
-                        totalPuntosContainer.innerHTML = `<h3>Total de Puntos Obtenidos: ${totalPuntos}</h3>`;
-                    })
-                    .catch(error => {
-                        // Si falla obtener oficiales, mostramos pronósticos y Puntos = 0 (Oficial: N/A)
-                        console.error('Error al obtener resultados oficiales:', error);
-                        let totalPuntos = 0;
-                        partidos.forEach(partidoPronosticado => {
-                            const partidoDiv = document.createElement('div');
-                            partidoDiv.classList.add('resultado');
-                            partidoDiv.innerHTML = `
-                                ${partidoPronosticado.equipo1} ${partidoPronosticado.marcador1} - ${partidoPronosticado.marcador2} ${partidoPronosticado.equipo2}
-                                | Oficial: N/A
-                                | Puntos: 0
-                            `;
-                            resultadosContainer.appendChild(partidoDiv);
-                        });
-                        totalPuntosContainer.innerHTML = `<h3>Total de Puntos Obtenidos: ${totalPuntos}</h3>`;
+                        const puntos = calcularPuntos(partidoPronosticado, resultadoOficialCorrespondiente);
+                        totalPuntos += puntos;
+
+                        const oficialTexto = resultadoOficialCorrespondiente && 
+                            isValidScore(resultadoOficialCorrespondiente.marcador1) && 
+                            isValidScore(resultadoOficialCorrespondiente.marcador2)
+                            ? `${resultadoOficialCorrespondiente.marcador1}-${resultadoOficialCorrespondiente.marcador2}`
+                            : 'N/A';
+
+                        partidoDiv.innerHTML = `${partidoPronosticado.equipo1} ${partidoPronosticado.marcador1} - ${partidoPronosticado.marcador2} ${partidoPronosticado.equipo2} | Oficial: ${oficialTexto} | Puntos: ${puntos}`;
+                        resultadosContainer.appendChild(partidoDiv);
                     });
-            })
-            .catch(error => {
-                console.error('Error al buscar resultados:', error);
-                resultadosContainer.textContent = 'Error al obtener resultados.';
-            });
+
+                    totalPuntosContainer.innerHTML = `<h3>Total de Puntos Obtenidos: ${totalPuntos}</h3>`;
+                })
+                .catch(error => {
+                    console.error('Error al obtener resultados oficiales:', error);
+                    resultadosContainer.textContent = 'Error al obtener resultados oficiales.';
+                });
+        })
+        .catch(error => {
+            console.error('Error al buscar resultados:', error);
+            resultadosContainer.textContent = 'Error al obtener resultados.';
+        });
     });
 
     loadJugadores();

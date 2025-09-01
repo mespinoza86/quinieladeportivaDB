@@ -194,6 +194,9 @@ app.post('/api/jugadores/:nombre/verificar-password', async (req, res) => {
     if (!jugador.password) return res.status(400).json({ error: 'Jugador no tiene contraseña' });
 
     // Comparar directamente la contraseña en texto plano con el hash guardado
+      console.log("REQ.PARAMS:", req.params.nombre);
+     console.log("REQ.BODY:", req.body);
+
     const match = await bcrypt.compare(password, jugador.password);    
 
     if (match) {    
@@ -434,6 +437,61 @@ app.get('/api/resultados-con-equipos/:jugador/:jornada', async (req, res) => {
 
   res.json(resultadosConEquipos);
 });
+
+app.post('/api/resultados-seguros/:jugador/:jornada', async (req, res) => {
+  try {
+    const { jugador, jornada } = req.params;
+    const { password } = req.body || {};
+
+    const jornadaDoc = await Jornada.findOne({ nombre: jornada });
+    if (!jornadaDoc) return res.status(404).json({ error: 'Jornada no encontrada' });
+
+    const resultado = await Resultado.findOne({ jugador, jornada });
+    if (!resultado) return res.status(404).json({ error: 'Resultados no encontrados' });
+
+    const jugadorDoc = await Jugador.findOne({ nombre: jugador });
+    if (!jugadorDoc) return res.status(404).json({ error: 'Jugador no encontrado' });
+
+   // Verificar si la jornada ya cerró
+const ahora = new Date();
+
+// Solo marcar como cerrada si existe fechaCierre y ya pasó
+const jornadaCerrada = jornadaDoc.fechaCierre && new Date(jornadaDoc.fechaCierre) <= ahora;
+
+// ⚡ Nuevo: si la jornada NO tiene fechaCierre, se considera "abierta libre"
+const jornadaSinFecha = !jornadaDoc.fechaCierre;
+
+if (!jornadaCerrada && !jornadaSinFecha) {
+    // Jornada aún abierta con fecha definida → revisar contraseña si existe
+if (jugadorDoc.password) {
+    if (!password) {
+        return res.json({ success: false, error: 'Contraseña requerida' }); // 👈 200 OK
+    }
+    const match = await bcrypt.compare(password, jugadorDoc.password);
+    if (!match) {
+        return res.status(401).json({ success: false, error: 'Contraseña incorrecta' }); // 👈 aquí sí 401
+    }
+}
+
+    // Si no tiene password, se permite ver resultados sin pedir nada
+}
+
+
+    // Preparar datos de partidos con equipos
+    const partidos = jornadaDoc.partidos.map((p, i) => ({
+      equipo1: p.equipo1,
+      equipo2: p.equipo2,
+      marcador1: resultado.pronosticos[i]?.marcador1 ?? '',
+      marcador2: resultado.pronosticos[i]?.marcador2 ?? ''
+    }));
+
+    res.json({ success: true, partidos });
+  } catch (error) {
+    console.error("Error en /api/resultados-seguros:", error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 
 /* ======== API: Resultados Totales ======== */
 

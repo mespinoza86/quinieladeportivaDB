@@ -161,6 +161,43 @@ function enviarPorWhatsapp() {
     window.open(`https://wa.me/?text=${mensajeWhatsapp}`, '_blank');
 }
 
+
+function pedirPasswordModal(jugador) {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('modalPassword');
+        const input = document.getElementById('inputPassword');
+        const btnOk = document.getElementById('btnPasswordOk');
+        const btnCancel = document.getElementById('btnPasswordCancel');
+
+        modal.style.display = 'flex';
+        input.value = '';
+        input.focus();
+
+        function cerrarModal() {
+            modal.style.display = 'none';
+            btnOk.removeEventListener('click', okHandler);
+            btnCancel.removeEventListener('click', cancelHandler);
+        }
+
+        function okHandler() {
+            const val = input.value;
+            cerrarModal();
+            resolve(val);
+        }
+
+        function cancelHandler() {
+            cerrarModal();
+            resolve(null);
+        }
+
+        btnOk.addEventListener('click', okHandler);
+        btnCancel.addEventListener('click', cancelHandler);
+    });
+}
+
+
+
+
 async function guardarResultados(jornada, fechaCierre) {
     const combo = document.getElementById('comboJugadores');
     const jugador = combo.value;
@@ -188,7 +225,7 @@ async function guardarResultados(jornada, fechaCierre) {
     // 3. Pedir contraseña y validarla
     let passwordCorrecta = false;
     while (!passwordCorrecta) {
-        const passwordIngresada = prompt(`Digite la contraseña del jugador ${jugador}:`);
+        const passwordIngresada = await pedirPasswordModal(jugador);
         if (passwordIngresada === null) return; // Cancelado
         const resp = await fetch(`/api/jugadores/${jugador}/verificar-password`, {
             method: "POST",

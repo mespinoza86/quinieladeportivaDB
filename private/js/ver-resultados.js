@@ -4,80 +4,127 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResultadosButton = document.getElementById('searchResultadosButton');
     const resultadosContainer = document.getElementById('resultadosContainer');
 
-    // Función para cargar jugadores
     function loadJugadores() {
         fetch('/api/jugadores')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(jugadores => {
                 if (Array.isArray(jugadores)) {
                     jugadorSelect.innerHTML = '<option value="">Selecciona un jugador</option>';
-                    jugadores.forEach(jugador => {
+                    jugadores.forEach(j => {
                         const option = document.createElement('option');
-                        option.value = jugador;
-                        option.textContent = jugador;
+                        option.value = j;
+                        option.textContent = j;
                         jugadorSelect.appendChild(option);
                     });
-                } else {
-                    console.error('Formato inesperado de datos de jugadores:', jugadores);
                 }
-            })
-            .catch(error => console.error('Error al cargar jugadores:', error));
+            }).catch(console.error);
     }
 
-    // Función para cargar jornadas
     function loadJornadas() {
         fetch('/api/jornadas')
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data)) {
+            .then(res => res.json())
+            .then(jornadas => {
+                if (Array.isArray(jornadas)) {
                     jornadaSelect.innerHTML = '<option value="">Selecciona una jornada</option>';
-                    data.forEach(jornada => {
+                    jornadas.forEach(j => {
                         const option = document.createElement('option');
-                        option.value = jornada.nombre;   // ahora usamos la propiedad del objeto
-                        option.textContent = jornada.nombre;
+                        option.value = j.nombre;
+                        option.textContent = j.nombre;
                         jornadaSelect.appendChild(option);
                     });
-                } else {
-                    console.error('Formato inesperado de datos de jornadas:', data);
                 }
-            })
-            .catch(error => console.error('Error al cargar jornadas:', error));
+            }).catch(console.error);
     }
 
-    // Función para buscar resultados
-    searchResultadosButton.addEventListener('click', () => {
+    // Función que muestra modal para contraseña y devuelve la contraseña escrita
+function pedirPassword() {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('passwordModal');
+        const input = document.getElementById('passwordInput');
+        const aceptar = document.getElementById('passwordAceptar');
+        const cancelar = document.getElementById('passwordCancelar');
+
+        modal.style.display = 'flex';
+        input.value = '';
+        input.focus();
+
+        aceptar.onclick = () => {
+            const val = input.value.trim();
+            modal.style.display = 'none';
+            if (!val) reject('Contraseña requerida');
+            else resolve(val);
+        };
+
+        cancelar.onclick = () => {
+            modal.style.display = 'none';
+            reject('Cancelado');
+        };
+    });
+}
+
+
+    async function buscarResultados() {
         const jugador = jugadorSelect.value;
         const jornada = jornadaSelect.value;
-    
-        if (jugador && jornada) {
-            fetch(`/api/resultados-con-equipos/${jugador}/${jornada}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('No se pudo obtener resultados');
-                    return response.json();
-                })
-                .then(partidos => {
-                    resultadosContainer.innerHTML = '';
 
-                    if (partidos.length === 0) {
-                        resultadosContainer.textContent = 'El jugador no ha pronosticado esta jornada.';
-                        return;
-                    }
-
-                    partidos.forEach(partido => {
-                        const partidoDiv = document.createElement('div');
-                        partidoDiv.classList.add('resultado');
-                        partidoDiv.textContent = `${partido.equipo1} ${partido.marcador1} - ${partido.marcador2} ${partido.equipo2}`;
-                        resultadosContainer.appendChild(partidoDiv);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error al buscar resultados:', error);
-                    resultadosContainer.textContent = 'Error al obtener resultados.';
-                });            
-        } else {
+        if (!jugador || !jornada) {
             resultadosContainer.textContent = 'Por favor, seleccione un jugador y una jornada.';
+            return;
         }
+
+        resultadosContainer.textContent = 'Cargando resultados...';
+
+        let body = {};
+
+try {
+    let data = await fetch(`/api/resultados-seguros/${jugador}/${jornada}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(res => res.json());
+
+    // Si requiere contraseña
+    if (data && data.success === false && data.error === 'Contraseña requerida') {
+        const password = await pedirPassword();
+        body.password = password;
+        data = await fetch(`/api/resultados-seguros/${jugador}/${jornada}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }).then(res => res.json());
+    }
+
+    resultadosContainer.innerHTML = '';
+
+    // Verificamos errores específicos
+    if (data && data.success === false && data.error === 'Contraseña incorrecta') {
+        resultadosContainer.textContent = 'La contraseña es incorrecta.';
+        return;
+    }
+
+    if (!data || !data.partidos || data.partidos.length === 0) {
+        resultadosContainer.textContent = 'El jugador no ha pronosticado resultados para esta jornada.';
+        return;
+    }
+
+    // Mostrar resultados si todo está correcto
+    data.partidos.forEach(p => {
+        const div = document.createElement('div');
+        div.classList.add('resultado');
+        div.textContent = `${p.equipo1} ${p.marcador1} - ${p.marcador2} ${p.equipo2}`;
+        resultadosContainer.appendChild(div);
     });
+
+} catch (err) {
+    console.error(err);
+    resultadosContainer.textContent = 'Error al obtener resultados.';
+}
+
+
+
+    }
+
+    searchResultadosButton.addEventListener('click', buscarResultados);
 
     loadJugadores();
     loadJornadas();
