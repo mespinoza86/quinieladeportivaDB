@@ -330,6 +330,9 @@ app.post('/api/resultados-oficiales', async (req, res) => {
   res.json(resultadosArray);
 });
 
+
+
+
 app.get('/api/resultados-oficiales/:jornada', async (req, res) => {
   try {
     const jornadaNombre = req.params.jornada;
@@ -556,7 +559,6 @@ app.get('/api/resultados-totales', async (req, res) => {
 
   res.json(resultadosTotales);
 });
-
 
 
 app.get('/generar_reporte', (req, res) => {
