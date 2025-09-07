@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveResultadosOficialesButton.addEventListener('click', () => {
+         const confirmar = confirm("¿Está seguro que desea guardar los cambios?");
+        if (!confirmar) return; // ⛔️ Si el usuario cancela, no hace nada   
+        
         const jornada = jornadaSelect.value;
         const resultados = Array.from(partidosContainer.querySelectorAll('.partido')).map(partido => {
         const inputs = partido.querySelectorAll('input');

@@ -291,5 +291,5 @@ async function guardarResultados(jornada, fechaCierre) {
         body: JSON.stringify({ jugador, jornada, pronosticos })
     });
 
-    alert("Resultados guardados correctamente");
+    alert("Recuerda enviar un mensaje en el grupo escribiendo que sus resultados ya fueron guardados.\n Revise en Resultados Pronosticados por Jugador que sus resultados son los correctos.\n Resultados guardados correctamente");
 }
