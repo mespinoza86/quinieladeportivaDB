@@ -4,10 +4,42 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Middleware CORS
+
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // ✅ Permitir llamadas sin origen (file:// en Android/PC)
+    if (!origin || origin === 'null') {
+      return callback(null, true);
+    }
+
+    // ✅ Lista de orígenes permitidos
+    const allowedOrigins = [
+      'http://localhost',
+      'http://localhost:3000',
+      'http://127.0.0.1',
+      'capacitor://localhost',
+      'https://quinieladeportivadb.onrender.com'
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true
+}));
+
+
+
 const bcrypt = require('bcrypt');
 const SALT_ROUNDS = 10;
 
@@ -142,6 +174,9 @@ app.get('/check-auth', (req, res) => res.json({ authenticated: req.session.authe
 
 
 app.get('/js/ver_resultados_totales_de_jugadores.js', (req, res) => res.sendFile(path.join(__dirname,'public', 'js', 'ver_resultados_totales_de_jugadores.js')));
+
+
+
 
 /* ======== API: Jugadores ======== */
 app.get('/api/jugadores', async (req, res) => {  
