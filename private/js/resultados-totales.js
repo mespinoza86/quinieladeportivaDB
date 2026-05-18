@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Crear encabezados dinámicamente
                 jornadas.forEach(jornadaId => {
                     const th = document.createElement('th');
-                    th.textContent = `Jornada ${jornadaId}`;
+                    th.textContent = `${jornadaId}`;
                     tableHead.appendChild(th);
                 });
 

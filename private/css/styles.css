@@ -629,82 +629,200 @@ button + button {
   margin-top: 0;
 }
 
-.mobile-results-list {
-  display: none;
+@media (max-width: 620px) {
+  #tablaContainer {
+    display: block;
+    overflow-x: auto;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #resultadosTotalesTable {
+    min-width: 760px;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  #resultadosTotalesTable th,
+  #resultadosTotalesTable td {
+    white-space: nowrap;
+    padding: 10px 12px;
+  }
+
+  #resultadosTotalesTable thead th:first-child,
+  #resultadosTotalesTable tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #10233d;
+    min-width: 120px;
+    text-align: left;
+  }
+
+  #resultadosTotalesTable thead th:last-child,
+  #resultadosTotalesTable tbody td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 5;
+    background: #10233d;
+    min-width: 80px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  #resultadosTotalesTable thead th:first-child,
+  #resultadosTotalesTable thead th:last-child {
+    z-index: 8;
+  }
+
+  #mobileResultadosContainer,
+  .mobile-results-list {
+    display: none !important;
+  }
 }
 
 @media (max-width: 620px) {
   #tablaContainer {
-    display: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .mobile-results-list {
-    display: grid;
-    gap: 14px;
-    margin-top: 16px;
+  #resultadosTotalesTable {
+    min-width: max-content;
+    border-collapse: separate;
+    border-spacing: 0;
   }
 
-  .mobile-result-card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 16px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  #resultadosTotalesTable th,
+  #resultadosTotalesTable td {
+    white-space: nowrap;
+    padding: 10px 14px;
   }
 
-  .mobile-result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .mobile-result-header h3 {
-    margin: 0;
-    font-size: 1.05rem;
-  }
-
-  .mobile-total {
-    background: rgba(34, 197, 94, 0.18);
-    border: 1px solid rgba(34, 197, 94, 0.35);
-    border-radius: 16px;
-    padding: 8px 12px;
+  #resultadosTotalesTable th:not(:first-child):not(:last-child),
+  #resultadosTotalesTable td:not(:first-child):not(:last-child) {
+    min-width: 120px;
     text-align: center;
-    min-width: 82px;
   }
 
-  .mobile-total span {
-    display: block;
-    color: var(--muted);
-    font-size: 0.72rem;
+  #resultadosTotalesTable th:first-child,
+  #resultadosTotalesTable td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    min-width: 185px;
+    background: #10233d;
+    text-align: left;
   }
 
-  .mobile-total strong {
-    font-size: 1.2rem;
+  #resultadosTotalesTable th:last-child,
+  #resultadosTotalesTable td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 5;
+    min-width: 95px;
+    background: #10233d;
+    text-align: center;
     color: var(--accent);
+    font-weight: 900;
   }
 
-  .mobile-jornadas {
-    display: grid;
-    gap: 8px;
+  #resultadosTotalesTable thead th {
+    z-index: 8;
+  }
+}
+
+@media (max-width: 620px) {
+  body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
-  .mobile-result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.06);
+  .mobile-shell.wide-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
   }
 
-  .mobile-result-row span {
-    color: var(--muted);
+  .app-panel {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
   }
 
-  .mobile-result-row strong {
-    color: var(--text);
-    font-size: 1rem;
+  #tablaContainer {
+    width: 100% !important;
+    overflow-x: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #resultadosTotalesTable {
+    width: max-content !important;
+    min-width: 520px !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+
+  #resultadosTotalesTable th,
+  #resultadosTotalesTable td {
+    white-space: nowrap !important;
+    padding: 10px 8px !important;
+    font-size: 0.95rem !important;
+  }
+
+  #resultadosTotalesTable th:first-child,
+  #resultadosTotalesTable td:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    min-width: 135px !important;
+    max-width: 135px !important;
+    background: #10233d !important;
+    text-align: left !important;
+    z-index: 10 !important;
+  }
+
+  #resultadosTotalesTable th:not(:first-child):not(:last-child),
+  #resultadosTotalesTable td:not(:first-child):not(:last-child) {
+    min-width: 120px !important;
+    max-width: 120px !important;
+    text-align: center !important;
+  }
+
+  #resultadosTotalesTable th:last-child,
+  #resultadosTotalesTable td:last-child {
+    position: sticky !important;
+    right: 0 !important;
+    min-width: 78px !important;
+    max-width: 78px !important;
+    background: #10233d !important;
+    color: var(--accent) !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    z-index: 10 !important;
+  }
+
+  #resultadosTotalesTable thead th {
+    z-index: 20 !important;
+  }
+
+  #mobileResultadosContainer,
+  .mobile-results-list {
+    display: none !important;
+  }
+}
+
+@media (max-width: 620px) {
+  #resultadosTotalesTable th:not(:first-child):not(:last-child) {
+    min-width: 140px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    text-align: center !important;
+  }
+
+  #resultadosTotalesTable td:not(:first-child):not(:last-child) {
+    min-width: 140px !important;
+    text-align: center !important;
   }
 }
