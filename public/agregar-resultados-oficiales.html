@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resultados Oficiales</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <script src="/js/agregar-resultados-oficiales.js" defer></script>
+
+  <title>Agregar Resultados Oficiales</title>
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="js/agregar-resultados-oficiales.js" defer></script>
 </head>
 
 <body class="app-body">
+
   <main class="mobile-shell wide-shell">
     <section class="hero-card">
       <div class="hero-top">
@@ -18,20 +21,30 @@
         </div>
         <div class="app-logo">✅</div>
       </div>
-      <p class="hero-text">Registra los marcadores reales de cada jornada.</p>
+
+      <p class="hero-text">
+        Selecciona una jornada, carga los partidos y registra los marcadores oficiales.
+      </p>
     </section>
 
     <section class="app-panel">
       <label for="jornadaSelect" class="field-label">Jornada</label>
       <select id="jornadaSelect"></select>
 
-      <button id="agregarResultadosOficialesButton">Agregar Resultados Oficiales</button>
+      <button id="addResultadosOficialesButton" type="button">
+        Agregar Resultados Oficiales
+      </button>
 
       <div id="partidosContainer" class="matches-container"></div>
 
       <div class="button-stack">
-        <button id="guardarResultadosOficialesButton">Guardar Resultados Oficiales</button>
-        <button onclick="window.location.href='adminmode.html'" class="ghost-button">Volver</button>
+        <button id="saveResultadosOficialesButton" type="button">
+          Guardar Resultados Oficiales
+        </button>
+
+        <button onclick="window.location.href='adminmode.html'" class="ghost-button" type="button">
+          Volver
+        </button>
       </div>
     </section>
   </main>
@@ -42,5 +55,6 @@
     <a href="resultados-totales.html">🏆<span>Tabla</span></a>
     <a href="adminmode.html" class="active">⚙️<span>Admin</span></a>
   </nav>
+
 </body>
 </html>
