@@ -1,745 +1,630 @@
-/* public/css/styles.css */
-/* public/css/styles.css */
-/* public/css/styles.css */
-/* Reset básico y estilos generales */
+:root {
+  --bg: #07111f;
+  --bg-soft: #0d1b2f;
+  --card: rgba(255, 255, 255, 0.08);
+  --card-solid: #10233d;
+  --text: #f8fafc;
+  --muted: #9fb0c7;
+  --primary: #22c55e;
+  --primary-dark: #16a34a;
+  --accent: #facc15;
+  --danger: #ef4444;
+  --border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  --radius: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    text-align: center;
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.22), transparent 32%),
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.16), transparent 28%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 90px;
+}
+
+.app-body {
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-shell {
+  width: 100%;
+  max-width: 520px;
+  padding: 18px;
+}
+
+.hero-card {
+  background: linear-gradient(145deg, rgba(34, 197, 94, 0.25), rgba(16, 35, 61, 0.96));
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 h1 {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    margin-bottom: 20px;
-    font-size: 2rem;
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.05;
 }
 
-.container {
-    margin: 20px auto;
-    padding: 10px;
-    text-align: left;
-    max-width: 800px;
-    width: 90%; /* ocupa 90% de la pantalla en móviles */
+.hero-text {
+  margin: 16px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
-.styled-form {
-    border: 1px solid #ddd;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+.app-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 2rem;
 }
 
-input, select, button, ul {
-    width: 100%;
-    max-width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    box-sizing: border-box;
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
-button:hover {
-    background-color: #0056b3;
+.action-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(250, 204, 21, 0.4);
 }
 
-footer {
-    padding: 10px;
-    text-align: center;
+.action-card.primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #04130a;
 }
 
-.tabla-contenedor {
-    width: 100%;
-    overflow-x: auto;
+.action-card .icon {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.14);
 }
 
-#tabla-resultados {
-    width: 100%;
-    border-collapse: collapse;
+.action-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
 }
 
-#tabla-resultados th,
-#tabla-resultados td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
+.action-card p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
-#tabla-resultados th {
-    background-color: #f4f4f4;
+.action-card.primary p {
+  color: rgba(4, 19, 10, 0.72);
 }
 
-/* Media Queries para pantallas más pequeñas */
-@media (max-width: 1024px) {
-    h1 { font-size: 1.8rem; }
-    .container { max-width: 90%; }
-    .partido-inputs input { width: 40%; }
-}
-
-@media (max-width: 768px) { /* tablets */
-    h1 { font-size: 1.5rem; padding: 15px; }
-    .container { padding: 10px; }
-    .partido-inputs { flex-direction: column; }
-    .partido-inputs input { width: 100%; margin-bottom: 10px; }
-}
-
-@media (max-width: 480px) { /* móviles */
-    h1 { font-size: 1.2rem; padding: 10px; }
-    .container { width: 95%; margin: 10px auto; }
-    button, input, select { font-size: 1rem; padding: 8px; }
-    .partido-inputs input { width: 100%; margin-bottom: 8px; }
-}
-
-
-/*
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-}
-*/
+/* Layout general para las otras páginas */
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
+  background: transparent;
+  padding: 20px;
+  text-align: center;
 }
-/*
-h1 {
-    margin: 0;
+
+header h1,
+section h1,
+.container h1 {
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  margin: 18px 0;
 }
-*/
+
 h2 {
-    color: #333;
+  color: var(--text);
 }
 
-#menuPrincipal {
-    margin: 20px;
+.container,
+section {
+  width: min(920px, calc(100% - 28px));
+  margin: 18px auto;
 }
 
-.menu-item {
-    margin: 10px 0;
+.styled-form,
+form,
+#jugadoresSection,
+#jornadaSection {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
 }
 
-.menu-item a {
-    display: block;
-    padding: 15px;
-    text-decoration: none;
-    color: #fff;
-    background-color: #007bff;
-    border-radius: 5px;
-    text-align: center;
+input,
+select,
+button,
+textarea {
+  width: 100%;
+  padding: 13px 14px;
+  margin: 8px 0;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  font-size: 1rem;
 }
 
-.menu-item a:hover {
-    background-color: #0056b3;
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
 }
 
-button {
-    padding: 10px;
-    margin: 5px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+button,
+.back-button {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #04130a;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  text-align: center;
 }
 
-button:hover {
-    background-color: #0056b3;
-}
-
-select, input[type="text"] {
-    padding: 10px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+button:hover,
+.back-button:hover {
+  filter: brightness(1.05);
 }
 
 ul {
-    list-style-type: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 li {
-    margin: 5px 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  margin: 8px 0;
 }
 
-#jugadoresSection,
-#jornadaSection {
-    margin: 20px auto;
-    max-width: 600px;
-    background-color: #fff;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+.tabla-contenedor,
+#tablaContainer {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 10px;
 }
 
-h2 {
-    color: #333;
-    margin: 20px 0 10px;
+table,
+#tabla-resultados,
+#resultadosTotalesTable,
+.resultadosTotalesTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
 }
 
-input, button, select {
-    padding: 10px;
-    margin: 5px;
+th,
+td,
+#tabla-resultados th,
+#tabla-resultados td,
+#resultadosTotalesTable th,
+#resultadosTotalesTable td {
+  border-bottom: 1px solid var(--border);
+  padding: 12px;
+  text-align: center;
 }
 
-#partidosList, #partidosJornadaList, #partidosModificarList {
-    list-style: none;
-    padding: 0;
+th,
+#tabla-resultados th,
+#resultadosTotalesTable th {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-#partidosList li,
-#partidosJornadaList li,
-#partidosModificarList li {
-    margin: 5px 0;
-}
-
-
-
-
-
-
-
-
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    text-align: center;
-}
-
-h1 {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.container {
-    margin: 20px;
-    text-align: left;
-    max-width: 400px;
-    margin: auto;
-}
-
-.left-aligned {
-    text-align: left;
-}
-
-.styled-form {
-    border: 1px solid #ddd;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
-input, button, select, ul {
-    width: 100%;
-    max-width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-    display: block;
-    text-align: left;
-}
-
-ul {
-    padding: 0;
-    list-style: none;
-}
-
-ul li {
-    padding: 10px;
-    background-color: #e4e4e4;
-    margin-bottom: 5px;
-}
-
-.back-button {
-    background-color: #333;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.back-button:hover {
-    background-color: #555;
-}
-
-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-input, select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-input:focus, select:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-
+.partido,
 .partido-inputs {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
+.partido input,
 .partido-inputs input {
-    width: 45%;
+  width: 100%;
 }
 
 .vs {
-    margin: 0 10px;
-    font-weight: bold;
-    color: #333;
-    white-space: nowrap;
+  color: var(--accent);
+  font-weight: 900;
 }
 
-/* Botón de agregar partido */
-button {
-    margin-top: 10px;
-    width: 100%;
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px));
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: rgba(6, 16, 31, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 10px;
+  box-shadow: var(--shadow);
+  z-index: 50;
 }
 
-.partidosModificarList li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
+.bottom-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  text-align: center;
+  font-size: 1.15rem;
+  padding: 8px 4px;
+  border-radius: 16px;
 }
 
-.partidosModificarList li input[type="checkbox"] {
-    margin-right: 10px;
+.bottom-nav a span {
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 2px;
 }
 
-
-
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
+.bottom-nav a.active,
+.bottom-nav a:hover {
+  background: rgba(34, 197, 94, 0.18);
+  color: var(--text);
 }
 
-header {
-    background-color: #333;
-    color: #fff;
+@media (min-width: 720px) {
+  .mobile-shell {
+    max-width: 900px;
+  }
+
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  h1 {
+    font-size: 1.65rem;
+  }
+
+  .hero-card {
     padding: 20px;
-    text-align: center;
+  }
+
+  .partido,
+  .partido-inputs {
+    flex-direction: column;
+  }
 }
 
-h1, h2 {
-    margin: 0;
+.app-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
 }
 
-
-section {
-    padding: 20px;
+.wide-shell {
+  max-width: 1100px;
 }
 
-form {
-    width: 100%;
-    max-width: 800px; /* Max width to keep it centered */
-    margin: 0 auto; /* Center form */
-    background-color: #fff; /* Background for better visibility */
-    padding: 20px;
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Shadow for a subtle 3D effect */
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-form > * {
-    margin-bottom: 20px;
-    width: 100%;
-    max-width: 600px; /* Max width for form elements */
+.helper-text {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
-.partido {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    width: 100%;
+.field-label {
+  display: block;
+  color: var(--accent);
+  font-weight: 800;
+  margin: 10px 0 4px;
 }
 
-
-.resultado {
-    margin-bottom: 10px;
-    font-size: 16px;
+.input-group {
+  margin: 14px 0;
 }
 
-.partido input {
-    margin: 0 10px; /* Spacing around inputs */
-    width: 60px; /* Fixed width for inputs */
+.info-card {
+  margin: 12px 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.25);
+  color: var(--text);
 }
 
-footer {
-    padding: 10px;
-    text-align: center;
+.list-card {
+  margin-top: 14px;
 }
 
-#resultadosTotalesTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
+.matches-container {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
 }
 
-#resultadosTotalesTable th, #resultadosTotalesTable td {
-    border: 1px solid #ddd;
-    padding: 8px;
+.button-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
 }
 
-#resultadosTotalesTable th {
-    background-color: #f2f2f2;
-    text-align: left;
+.button-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Estilos generales */
-/* Agregado despues de resultatos totales de jugadores */
-
-
-
-
-
-
-
-
-/* Estilos generales */
-/* Agregado despues de resultatos totales de jugadores */
-/* Estilos generales */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
+.secondary-button {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
+.ghost-button {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
 }
 
-h1, h2 {
-    margin: 0;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(8px);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 18px;
 }
 
-.container {
-    margin: 20px auto; /* Centrado horizontalmente */
-    text-align: left;
-    max-width: 800px; /* Máximo ancho del contenedor */
+.modal-card {
+  width: min(380px, 100%);
+  background: #10233d;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  text-align: center;
 }
 
-.styled-form {
-    border: 1px solid #ddd;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+.modal-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: rgba(250, 204, 21, 0.14);
+  font-size: 1.7rem;
 }
 
-/* Ajustes para el contenedor de la tabla */
-.tabla-contenedor {
-    width: 100%; /* Ocupa todo el ancho del contenedor padre */
-    overflow-x: auto; /* Desplazamiento horizontal si es necesario */
-    padding: 0; /* Sin padding extra para asegurar el ancho completo */
-    margin: 0 auto; /* Centrar el contenedor */
+#partidosJornadaList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
 }
 
-/* Asegúrate de que la tabla ocupe el 100% del ancho disponible */
-#tabla-resultados {
-    width: 100%; /* Ancho completo de la tabla */
-    border-collapse: collapse;
+#resultadosTotalesTable thead th:first-child,
+#resultadosTotalesTable tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background: #10233d;
+  z-index: 2;
 }
 
-#tabla-resultados th,
-#tabla-resultados td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
+#resultadosTotalesTable thead th:last-child,
+#resultadosTotalesTable tbody td:last-child {
+  position: sticky;
+  right: 0;
+  background: #10233d;
+  z-index: 2;
 }
 
-#tabla-resultados th {
-    background-color: #f4f4f4;
+@media (max-width: 520px) {
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title-row {
+    flex-direction: column;
+  }
 }
 
-/* Botones */
-button {
-    padding: 10px;
-    margin: 5px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.admin-grid {
+  grid-template-columns: 1fr;
 }
 
-button:hover {
-    background-color: #0056b3;
+.logout-box {
+  margin-top: 18px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
-.back-button {
-    background-color: #333;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    text-align: center;
+.divider {
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+  margin: 22px 0;
 }
 
-.back-button:hover {
-    background-color: #555;
+.danger-button {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #fff;
 }
 
-input, select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 10px;
-    margin: 5px;
-    width: 100%;
-    max-width: 100%;
-    display: block;
-    text-align: left;
+.match-editor-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 16px;
+  margin: 12px 0;
 }
 
-input:focus, select:focus {
-    border-color: #007bff;
-    outline: none;
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
-
-/* Modal base */
-/*
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 10px;
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-.modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+.autocomplete-suggestions {
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  max-height: 180px;
+  overflow-y: auto;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
-.modal-content input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0 15px 0;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+.autocomplete-suggestion {
+  padding: 10px 12px;
+  cursor: pointer;
 }
 
-.modal-buttons button {
-    margin: 0 5px;
-    padding: 8px 16px;
-    font-size: 1rem;
-    cursor: pointer;
+.autocomplete-suggestion:hover {
+  background: #e5e7eb;
 }
 
-
-*/
-
-
-
-
-
-
-
-
-/*body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
+.checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: var(--text);
+  margin: 12px 0;
+  cursor: pointer;
 }
 
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
+.checkbox-card input {
+  width: auto;
+  margin: 0;
 }
 
-h1, h2 {
-    margin: 0;
+#jugadoresList li,
+#partidosList li,
+#partidosJornadaList li,
+#partidosModificarList li {
+  background: rgba(255, 255, 255, 0.07);
 }
 
-.container {
-    margin: 20px auto; 
-    text-align: left;
-    max-width: 800px; 
+@media (min-width: 720px) {
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .two-column {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-.styled-form {
-    border: 1px solid #ddd;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+textarea {
+  min-height: 160px;
+  resize: vertical;
+  line-height: 1.5;
 }
 
-
-.tabla-contenedor {
-    width: 100%; 
-    overflow-x: auto;
-    padding: 0; 
-    margin: 0 auto;
+#resultadosContainer,
+#partidosContainer {
+  margin-top: 16px;
 }
 
-#tablaContainer {
-    width: 100%; 
-    display: block;
-    overflow-x: auto; 
+#resultadosContainer > div,
+#partidosContainer > div {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 12px;
 }
 
-.resultadosTotalesTable {
-    border-collapse: collapse;
-    width: 100%; 
+#resultadosContainer p,
+#partidosContainer p {
+  color: var(--text);
 }
 
-.resultadosTotalesTable th,
-.resultadosTotalesTable td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
+select:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid rgba(34, 197, 94, 0.55);
+  border-color: rgba(34, 197, 94, 0.65);
 }
 
-
-.resultadosTotalesTable thead th:first-child,
-.resultadosTotalesTable tbody td:first-child,
-.resultadosTotalesTable thead th:last-child,
-.resultadosTotalesTable tbody td:last-child {
-    position: sticky;
-    background: #fff;
-    z-index: 2;
+button + button {
+  margin-top: 0;
 }
-
-.resultadosTotalesTable thead th:first-child,
-.resultadosTotalesTable tbody td:first-child {
-    left: 0;
-}
-
-.resultadosTotalesTable thead th:last-child,
-.resultadosTotalesTable tbody td:last-child {
-    right: 0;
-}
-
-
-.resultadosTotalesTable th,
-.resultadosTotalesTable td {
-    min-width: 100px; 
-}
-
-
-button {
-    padding: 10px;
-    margin: 5px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.back-button {
-    background-color: #333;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.back-button:hover {
-    background-color: #555;
-}
-
-input, select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 10px;
-    margin: 5px;
-    width: 100%;
-    max-width: 100%;
-    display: block;
-    text-align: left;
-}
-
-input:focus, select:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-*/

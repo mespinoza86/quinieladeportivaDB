@@ -1,36 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agregar Resultados Oficiales</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Fuente Roboto con soporte de acentos -->
-    <script src="https://unpkg.com/jspdf-font@1.0.0/Roboto-Regular-normal.js"></script>
-    <!-- Tu archivo de lógica -->    
-    <script src="js/agregar-resultados-oficiales.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultados Oficiales</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/js/agregar-resultados-oficiales.js" defer></script>
 </head>
-<body>
-    <header>
-        <h1>Agregar Resultados Oficiales</h1>
-    </header>
-    <main>
-        <section id="resultadosOficialesSection">
-            <form id="resultadosOficialesForm">
-                <label for="jornadaSelect">Jornada:</label>
-                <select id="jornadaSelect"></select>
 
-                <button id="addResultadosOficialesButton" type="button">Agregar Resultados Oficiales</button>
+<body class="app-body">
+  <main class="mobile-shell wide-shell">
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Administración</p>
+          <h1>Resultados Oficiales</h1>
+        </div>
+        <div class="app-logo">✅</div>
+      </div>
+      <p class="hero-text">Registra los marcadores reales de cada jornada.</p>
+    </section>
 
-                <div id="partidosContainer"></div>
+    <section class="app-panel">
+      <label for="jornadaSelect" class="field-label">Jornada</label>
+      <select id="jornadaSelect"></select>
 
-                <button id="saveResultadosOficialesButton" type="button">Guardar Resultados Oficiales</button>
-            </form>
-        </section>
-    </main>
-    <footer>
-        <button onclick="window.location.href='adminmode.html'">Volver</button>
-    </footer>
+      <button id="agregarResultadosOficialesButton">Agregar Resultados Oficiales</button>
+
+      <div id="partidosContainer" class="matches-container"></div>
+
+      <div class="button-stack">
+        <button id="guardarResultadosOficialesButton">Guardar Resultados Oficiales</button>
+        <button onclick="window.location.href='adminmode.html'" class="ghost-button">Volver</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html">🏠<span>Inicio</span></a>
+    <a href="ver_jornadas.html">📅<span>Jornadas</span></a>
+    <a href="resultados-totales.html">🏆<span>Tabla</span></a>
+    <a href="adminmode.html" class="active">⚙️<span>Admin</span></a>
+  </nav>
 </body>
 </html>

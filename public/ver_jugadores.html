@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Jugadores</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/ver_jugadores.js" defer></script>
-    <style>
-        /* Estilos para centrar el contenido */
-        .form-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc; /* Añade un borde */
-            border-radius: 10px; /* Bordes redondeados */
-            background-color: #f9f9f9; /* Fondo claro */
-        }
-        ul, button {
-            width: 100%; /* Ajusta el ancho de los elementos */
-            margin: 10px 0; /* Añade un margen vertical entre los elementos */
-        }
-        button {
-            width: auto; /* Ajusta el ancho del botón */
-            align-self: center; /* Centra el botón dentro del contenedor flex */
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Ver Jugadores</title>
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="js/ver_jugadores.js" defer></script>
 </head>
-<body>
-    <header>
-        <h1>Ver Jugadores</h1>
-    </header>
-    <main>
-        <section id="verJugadoresSection" class="form-container">
-            <h2>Lista de Jugadores</h2>
-            <!-- Cambiar aquí el ID de jugadoresList a listaJugadores -->
-            <ul id="listaJugadores"></ul>
-            <button onclick="window.location.href='index.html'">Volver</button>
-        </section>
-    </main>
+
+<body class="app-body">
+  <main class="mobile-shell">
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Participantes</p>
+          <h1>Jugadores</h1>
+        </div>
+        <div class="app-logo">👥</div>
+      </div>
+
+      <p class="hero-text">Consulta los jugadores registrados en la quiniela.</p>
+    </section>
+
+    <section id="verJugadoresSection" class="app-panel">
+      <h2>Lista de Jugadores</h2>
+
+      <!-- ESTE ID ES EL QUE USA TU JS -->
+      <ul id="listaJugadores"></ul>
+
+      <button onclick="window.location.href='index.html'" class="ghost-button">Volver</button>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html">🏠<span>Inicio</span></a>
+    <a href="ver_jornadas.html">📅<span>Jornadas</span></a>
+    <a href="resultados-totales.html">🏆<span>Tabla</span></a>
+    <a href="adminmode.html">⚙️<span>Admin</span></a>
+  </nav>
 </body>
 </html>

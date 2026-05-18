@@ -1,93 +1,84 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados Totales</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script defer src="js/resultados-totales.js"></script>
-    <style>
-        /* Estilos para mantener fija la columna del jugador y la columna del total */
-        #tablaContainer {
-            display: flex;
-            overflow-x: auto;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        #resultadosTotalesTable {
-            border-collapse: collapse;
-            width: 100%;
-        }
+  <title>Resultados Totales</title>
 
-        #resultadosTotalesTable th, #resultadosTotalesTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script defer src="/js/resultados-totales.js"></script>
 
-        /* Mantener fija la primera columna y la última columna */
-        #resultadosTotalesTable thead th:first-child,
-        #resultadosTotalesTable tbody td:first-child,
-        #resultadosTotalesTable thead th:last-child,
-        #resultadosTotalesTable tbody td:last-child {
-            position: sticky;
-            background: #fff;
-            z-index: 2;
-        }
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      const boton = document.getElementById("calcularResultados");
+      if (boton) {
+        boton.click();
+      }
+    }, 500);
+  });
+</script>
 
-        #resultadosTotalesTable thead th:first-child,
-        #resultadosTotalesTable tbody td:first-child {
-            left: 0;
-        }
-
-        #resultadosTotalesTable thead th:last-child,
-        #resultadosTotalesTable tbody td:last-child {
-            right: 0;
-        }
-
-        /* Estilo para el contenedor con scroll horizontal */
-        .scrollable-jornadas {
-            overflow-x: auto;
-            display: block;
-        }
-
-        /* Ajuste del ancho de las columnas */
-        #resultadosTotalesTable th,
-        #resultadosTotalesTable td {
-            min-width: 100px; /* Ajustar según sea necesario */
-        }
-    </style>
 </head>
-<body>
-    <header>
-        <h1>Resultados Totales</h1>
-    </header>
-    <main>
-        <button id="calcularResultados">Calcular Resultados</button>
-        <div id="tablaContainer">
-            <table id="resultadosTotalesTable">
-                <thead>
-                    <tr>
-                        <th>Jugador</th>
-                        <!-- Aquí se añadirán dinámicamente las cabeceras de las jornadas -->
-                        <!-- Mantendremos la columna de total al final -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Aquí se añadirán dinámicamente las filas con los resultados -->
-                </tbody>
-            </table>
+
+<body class="app-body">
+
+  <main class="mobile-shell wide-shell">
+
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Clasificación</p>
+          <h1>Tabla General</h1>
         </div>
-        <br>
-        <button id="volverButton">Volver</button>
-    </main>
-    <footer>
-        <p>&copy; 2024 Quiniela Deportiva</p>
-    </footer>
-    <script>
-        // Redireccionar a la página principal (index.html) al hacer clic en el botón "Volver"
-        document.getElementById('volverButton').addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
-    </script>
+        <div class="app-logo">🏆</div>
+      </div>
+
+      <p class="hero-text">
+        Consulta el acumulado de puntos por jugador y calcula los resultados generales.
+      </p>
+    </section>
+
+    <section class="app-panel">
+      <div class="section-title-row">
+        <div>
+          <h2>Resultados totales</h2>
+          <p class="helper-text">Desliza horizontalmente para ver todas las jornadas.</p>
+        </div>
+      </div>
+
+      <button id="calcularResultados">Calcular Resultados</button>
+
+      <div id="tablaContainer" class="tabla-contenedor">
+        <table id="resultadosTotalesTable">
+          <thead>
+            <tr>
+              <th>Jugador</th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <button id="volverButton" class="ghost-button">Volver</button>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html">🏠<span>Inicio</span></a>
+    <a href="ver_jornadas.html">📅<span>Jornadas</span></a>
+    <a href="resultados-totales.html" class="active">🏆<span>Tabla</span></a>
+    <a href="adminmode.html">⚙️<span>Admin</span></a>
+  </nav>
+
+  <script>
+    document.getElementById('volverButton').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+
 </body>
 </html>

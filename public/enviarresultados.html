@@ -1,32 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Copiar Resultados</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    select, button { padding: 5px 10px; margin: 5px 0; }
-    #resultados { white-space: pre; margin-top: 20px; background: #f0f0f0; padding: 10px; border-radius: 5px; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enviar Resultados</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/js/enviarresultados.js" defer></script>
 </head>
-<body>
 
-  <h2>Copiar Resultados de Jornada</h2>
-  
-  <label for="comboJornadas">Selecciona Jornada:</label>
-  <select id="comboJornadas">
-    <option value="">-- Selecciona --</option>
-  </select>
+<body class="app-body">
+  <main class="mobile-shell">
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Compartir</p>
+          <h1>Resultados de Jornada</h1>
+        </div>
+        <div class="app-logo">📲</div>
+      </div>
+      <p class="hero-text">Copia o envía por WhatsApp los resultados de una jornada.</p>
+    </section>
 
-  <button id="btnCopiar">Copiar Resultados</button>
-  <button id="btnWhatsapp">Enviar por WhatsApp</button>
+    <section class="app-panel">
+      <h2>Copiar Resultados de Jornada</h2>
 
-  <pre id="resultados"></pre>
+      <label for="jornadaSelect" class="field-label">Selecciona Jornada</label>
+      <select id="jornadaSelect">
+        <option value="">-- Selecciona --</option>
+      </select>
 
-  <script src="js/enviarresultados.js"></script>
-  <link rel="stylesheet" href="css/styles.css">
-  <footer>
-        <button onclick="window.location.href='index.html'">Volver</button>
-    </footer>
+      <div class="button-stack">
+        <button id="copiarResultadosButton">Copiar Resultados</button>
+        <button id="enviarWhatsappButton" class="secondary-button">Enviar por WhatsApp</button>
+        <button onclick="window.location.href='adminmode.html'" class="ghost-button">Volver</button>
+      </div>
+
+      <textarea id="resultadoTexto" rows="10" placeholder="Aquí aparecerá el texto generado..."></textarea>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html">🏠<span>Inicio</span></a>
+    <a href="ver_jornadas.html">📅<span>Jornadas</span></a>
+    <a href="resultados-totales.html">🏆<span>Tabla</span></a>
+    <a href="adminmode.html" class="active">⚙️<span>Admin</span></a>
+  </nav>
 </body>
 </html>
