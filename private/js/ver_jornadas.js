@@ -49,23 +49,51 @@ function loadJornadas() {
         .catch(error => console.error('Error al cargar las jornadas:', error));
 }
 
+function logoHTML(url, nombre) {
+    if (!url) return '';
+    return `<img src="${url}" class="team-logo" alt="${nombre || 'Equipo'}">`;
+}
+
 function mostrarPartidosDeJornada(partidos, fechaCierre) {
     const partidosJornadaList = document.getElementById('partidosJornadaList');
-    partidosJornadaList.innerHTML = ''; 
+    partidosJornadaList.innerHTML = '';
 
-    // Mostrar fecha de cierre si existe
     if (fechaCierre) {
         const fecha = new Date(fechaCierre);
         const liFecha = document.createElement('li');
-        liFecha.textContent = `Fecha de cierre: ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+        liFecha.innerHTML = `
+            <strong>Fecha de cierre:</strong>
+            ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}
+        `;
+
         partidosJornadaList.appendChild(liFecha);
     }
 
-    // Mostrar partidos
     partidos.forEach(partido => {
         const li = document.createElement('li');
-        li.textContent = `${partido.equipo1} vs ${partido.equipo2}` + (partido.comodin ? ' (Comodín)' : '');
+
+        li.innerHTML = `
+            <div class="match-teams">
+                <div class="team-side">
+                    ${logoHTML(partido.logoEquipo1, partido.equipo1)}
+                    <strong>${partido.equipo1}</strong>
+                </div>
+
+                <span class="vs">vs</span>
+
+                <div class="team-side">
+                    ${logoHTML(partido.logoEquipo2, partido.equipo2)}
+                    <strong>${partido.equipo2}</strong>
+                </div>
+
+                ${partido.comodin ? '<span class="badge">Comodín</span>' : ''}
+            </div>
+        `;
+
         partidosJornadaList.appendChild(li);
     });
 }
-

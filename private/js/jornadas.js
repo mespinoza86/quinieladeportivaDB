@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modificarEquipo2Input = document.getElementById('modificarEquipo2Input');
     const agregarPartidoButton = document.getElementById('agregarPartidoButton');
     const modificarComodinCheckbox = document.getElementById('modificarComodinSelect');
+    const eliminarJornadaButton = document.getElementById('eliminarJornadaButton'); 
 
     // ⏰ Limitar fecha mínima a hoy (para input date)
     const fechaInputEl = document.getElementById('fechaCierreInput');
@@ -458,6 +459,49 @@ function updateModificarJornadaPartidos() {
             })
             .catch(err => console.error('Error agregando partido:', err));
     });
+
+
+    eliminarJornadaButton.addEventListener('click', async () => {
+        const jornada = modificarJornadaSelect.value;
+
+        if (!jornada) {
+            alert('Selecciona una jornada para eliminar.');
+            return;
+        }
+
+        const confirmar = confirm(
+                `¿Seguro que deseas eliminar la jornada "${jornada}"?\n\nEsto también borrará los pronósticos de todos los jugadores y los resultados oficiales.`
+        );
+
+        if (!confirmar) return;
+
+        try {
+            const response = await fetch(`/api/jornadas/${encodeURIComponent(jornada)}`, {
+                method: 'DELETE'
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+                alert(data.error || 'Error eliminando jornada');
+                return;
+            }
+
+            alert('Jornada eliminada correctamente.');
+    
+            jornadaActualParaModificar = '';
+            modificarJornadaControls.style.display = 'none';
+            partidosModificarList.innerHTML = '';
+            partidosJornadaList.innerHTML = '';
+    
+            loadJornadas();
+    
+        } catch (error) {
+            console.error('Error eliminando jornada:', error);
+            alert('Error eliminando jornada');
+        }
+    });
+
 
     eliminarPartidosButton.addEventListener('click', () => {
         const selectedIndices = Array.from(

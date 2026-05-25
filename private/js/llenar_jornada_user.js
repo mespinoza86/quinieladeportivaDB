@@ -54,52 +54,112 @@ function loadPartidos(nombreJornada) {
         .catch(error => console.error('Error al cargar los partidos:', error));
 }
 
+function logoHTML(url, nombre) {
+    if (!url) return '';
+    return `<img src="${url}" class="team-logo" alt="${nombre || 'Equipo'}">`;
+}
+
 function mostrarPartidos(partidos, fechaCierre) {
     const partidosContainer = document.getElementById('partidosContainer');
-    partidosContainer.innerHTML = ''; 
+    partidosContainer.innerHTML = '';
 
     if (fechaCierre) {
         const fecha = new Date(fechaCierre);
         const infoDiv = document.createElement('div');
+
         infoDiv.id = "infoCierre";
         infoDiv.style.marginBottom = "20px";
         infoDiv.style.textAlign = "center";
+
         infoDiv.innerHTML = `
-            <div><strong>Cierre de jornada:</strong> ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>        
-            <div><strong>Tiempo restante:</strong> <span id="contadorCierre"></span></div>
+            <div>
+                <strong>Cierre de jornada:</strong>
+                ${fecha.toLocaleDateString()}
+                ${fecha.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute:'2-digit'
+                })}
+            </div>
+
+            <div>
+                <strong>Tiempo restante:</strong>
+                <span id="contadorCierre"></span>
+            </div>
         `;
+
         partidosContainer.appendChild(infoDiv);
 
         setInterval(() => {
             const ahora = new Date();
             const diff = fecha - ahora;
+
             if (diff > 0) {
                 const horas = Math.floor(diff / (1000 * 60 * 60));
                 const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-                document.getElementById("contadorCierre").textContent = `${horas}h ${minutos}m ${segundos}s`;
+
+                document.getElementById("contadorCierre").textContent =
+                    `${horas}h ${minutos}m ${segundos}s`;
             } else {
-                document.getElementById("contadorCierre").textContent = "Jornada cerrada";
+                document.getElementById("contadorCierre").textContent =
+                    "Jornada cerrada";
             }
         }, 1000);
     }
 
     partidos.forEach((partido, i) => {
         const partidoDiv = document.createElement('div');
+
         partidoDiv.classList.add('partido-container');
-        const estiloNegrita = partido.comodin ? 'font-weight: bold;' : '';
-    
+
+        const estiloNegrita = partido.comodin
+            ? 'font-weight: bold;'
+            : '';
+
         partidoDiv.innerHTML = `
-            <label style="${estiloNegrita}">${partido.equipo1}</label>
-            <input type="text" id="resultadoEquipo1_${i}">
-            <label style="${estiloNegrita}">vs</label>
-            <input type="text" id="resultadoEquipo2_${i}">
-            <label style="${estiloNegrita}">${partido.equipo2}</label>
-            <label style="display: none;">Comodín: ${partido.comodin ? 'Sí' : 'No'}</label>
+            <div class="match-teams">
+
+                <div class="team-side">
+                    ${logoHTML(partido.logoEquipo1, partido.equipo1)}
+
+                    <label style="${estiloNegrita}">
+                        ${partido.equipo1}
+                    </label>
+                </div>
+
+                <input
+                    type="text"
+                    id="resultadoEquipo1_${i}"
+                >
+
+                <label style="${estiloNegrita}">
+                    vs
+                </label>
+
+                <input
+                    type="text"
+                    id="resultadoEquipo2_${i}"
+                >
+
+                <div class="team-side">
+                    ${logoHTML(partido.logoEquipo2, partido.equipo2)}
+
+                    <label style="${estiloNegrita}">
+                        ${partido.equipo2}
+                    </label>
+                </div>
+
+                <label style="display:none;">
+                    Comodín: ${partido.comodin ? 'Sí' : 'No'}
+                </label>
+
+            </div>
         `;
+
         partidosContainer.appendChild(partidoDiv);
     });
 }
+
 
 function copiarResultados() {
     const nombreJugador = document.getElementById('comboJugadores').value;

@@ -247,10 +247,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
                 <div class="match-teams">
-                    <strong>${partido.equipo1}</strong>
-                    <span class="vs">vs</span>
-                    <strong>${partido.equipo2}</strong>
-                </div>
+  <div class="team-side">
+    ${partido.logoEquipo1 ? `<img src="${partido.logoEquipo1}" class="team-logo" alt="${partido.equipo1}">` : ''}
+    <strong>${partido.equipo1}</strong>
+  </div>
+
+  <span class="vs">vs</span>
+
+  <div class="team-side">
+    ${partido.logoEquipo2 ? `<img src="${partido.logoEquipo2}" class="team-logo" alt="${partido.equipo2}">` : ''}
+    <strong>${partido.equipo2}</strong>
+  </div>
+</div>
+
 
                 <div class="match-score">
                     ${marcador1} - ${marcador2}
@@ -305,6 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
             partidosPreliminares.push({
                 equipo1: partido.equipo1,
                 equipo2: partido.equipo2,
+                logoEquipo1: partido.logoEquipo1 || '',
+                logoEquipo2: partido.logoEquipo2 || '',                
                 comodin: comodinCheckbox ? comodinCheckbox.checked : false,
                 apiFixtureId: partido.apiFixtureId,
                 apiLeagueId: partido.apiLeagueId,

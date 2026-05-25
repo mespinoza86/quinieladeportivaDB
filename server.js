@@ -100,6 +100,8 @@ const JornadaSchema = new mongoose.Schema({
   partidos: [{
     equipo1: String,
     equipo2: String,
+    logoEquipo1: String,
+    logoEquipo2: String,
     comodin: { type: Boolean, default: false },
 
     apiFixtureId: String,
@@ -324,6 +326,8 @@ app.post('/api/jornadas/importar-api', async (req, res) => {
     const partidosFormateados = partidos.map(p => ({
       equipo1: p.equipo1,
       equipo2: p.equipo2,
+       logoEquipo1: p.logoEquipo1 || '',
+       logoEquipo2: p.logoEquipo2 || '',
       comodin: !!p.comodin,
       apiFixtureId: p.apiFixtureId ? String(p.apiFixtureId) : '',
       apiLeagueId: p.apiLeagueId ? String(p.apiLeagueId) : '',
@@ -438,6 +442,8 @@ app.get('/api/football/fixtures', async (req, res) => {
       apiLeagueId: Number(item.league_id),
       equipo1: item.match_hometeam_name,
       equipo2: item.match_awayteam_name,
+      logoEquipo1: item.team_home_badge || '',
+      logoEquipo2: item.team_away_badge || '',      
       marcador1: item.match_hometeam_score !== '' ? Number(item.match_hometeam_score) : null,
       marcador2: item.match_awayteam_score !== '' ? Number(item.match_awayteam_score) : null
     }));
@@ -833,6 +839,8 @@ app.post('/api/resultados-seguros/:jugador/:jornada', async (req, res) => {
     const partidos = jornadaDoc.partidos.map((p, i) => ({
       equipo1: p.equipo1,
       equipo2: p.equipo2,
+      logoEquipo1: p.logoEquipo1 || '',
+      logoEquipo2: p.logoEquipo2 || '',      
       marcador1: resultado.pronosticos[i]?.marcador1 ?? '',
       marcador2: resultado.pronosticos[i]?.marcador2 ?? ''
     }));
@@ -845,6 +853,31 @@ app.post('/api/resultados-seguros/:jugador/:jornada', async (req, res) => {
 });
 
 /* ================= API: Resultados Totales ================= */
+app.delete('/api/jornadas/:nombre', async (req, res) => {
+  try {
+    const nombreJornada = req.params.nombre;
+
+    const jornadaEliminada = await Jornada.findOneAndDelete({
+      nombre: nombreJornada
+    });
+
+    if (!jornadaEliminada) {
+      return res.status(404).json({ error: 'Jornada no encontrada' });
+    }
+
+    await Resultado.deleteMany({ jornada: nombreJornada });
+    await ResultadoOficial.deleteMany({ jornada: nombreJornada });
+
+    res.json({
+      success: true,
+      message: 'Jornada, pronósticos y resultados oficiales eliminados'
+    });
+
+  } catch (error) {
+    console.error('Error eliminando jornada:', error);
+    res.status(500).json({ error: 'Error eliminando jornada' });
+  }
+});
 
 app.get('/api/resultados-totales', async (req, res) => {
   const jugadores = await Jugador.find({});

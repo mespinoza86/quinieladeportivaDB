@@ -108,12 +108,32 @@ try {
     }
 
     // Mostrar resultados si todo está correcto
-    data.partidos.forEach(p => {
-        const div = document.createElement('div');
-        div.classList.add('resultado');
-        div.textContent = `${p.equipo1} ${p.marcador1} - ${p.marcador2} ${p.equipo2}`;
-        resultadosContainer.appendChild(div);
-    });
+    // Mostrar resultados si todo está correcto
+data.partidos.forEach(p => {
+    const div = document.createElement('div');
+    div.classList.add('match-card', 'resultado');
+
+    div.innerHTML = `
+        <div class="match-teams">
+            <div class="team-side">
+                ${p.logoEquipo1 ? `<img src="${p.logoEquipo1}" class="team-logo" alt="${p.equipo1}">` : ''}
+                <strong>${p.equipo1}</strong>
+            </div>
+
+            <span class="match-score">
+                ${p.marcador1 ?? '-'} - ${p.marcador2 ?? '-'}
+            </span>
+
+            <div class="team-side">
+                ${p.logoEquipo2 ? `<img src="${p.logoEquipo2}" class="team-logo" alt="${p.equipo2}">` : ''}
+                <strong>${p.equipo2}</strong>
+            </div>
+        </div>
+    `;
+
+    resultadosContainer.appendChild(div);
+});
+
 
 } catch (err) {
     console.error(err);

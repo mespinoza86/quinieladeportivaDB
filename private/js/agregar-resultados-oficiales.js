@@ -91,9 +91,17 @@ document.addEventListener('DOMContentLoaded', () => {
         partidosContainer.innerHTML = partidos.map((partido, index) => `
             <div class="match-card partido" data-comodin="${partido.comodin ? 'true' : 'false'}">
                 <div class="match-teams">
-                    <strong>${partido.equipo1}</strong>
+                    <div class="team-side">
+                        ${partido.logoEquipo1 ? `<img src="${partido.logoEquipo1}" class="team-logo" alt="${partido.equipo1}">` : ''}
+                        <strong>${partido.equipo1}</strong>
+                    </div>
+
                     <span class="vs">vs</span>
-                    <strong>${partido.equipo2}</strong>
+
+                    <div class="team-side">
+                        ${partido.logoEquipo2 ? `<img src="${partido.logoEquipo2}" class="team-logo" alt="${partido.equipo2}">` : ''}
+                        <strong>${partido.equipo2}</strong>
+                    </div>
                 </div>
 
                 <div class="two-column">
