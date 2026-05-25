@@ -74,12 +74,19 @@ mongoose.connect(process.env.MONGO_URI)
 
 /* ================= API-Football ================= */
 
+/*
 const footballApi = axios.create({
   baseURL: 'https://v3.football.api-sports.io',
   headers: {
     'x-apisports-key': process.env.API_FOOTBALL_KEY
   }
 });
+*/
+
+const apiFootballCom = axios.create({
+  baseURL: 'https://apiv3.apifootball.com/'
+});
+
 
 /* ================= Schemas ================= */
 
@@ -95,8 +102,8 @@ const JornadaSchema = new mongoose.Schema({
     equipo2: String,
     comodin: { type: Boolean, default: false },
 
-    apiFixtureId: Number,
-    apiLeagueId: Number,
+    apiFixtureId: String,
+    apiLeagueId: String,
     apiDate: String,
     apiStatus: String
   }],
@@ -318,10 +325,10 @@ app.post('/api/jornadas/importar-api', async (req, res) => {
       equipo1: p.equipo1,
       equipo2: p.equipo2,
       comodin: !!p.comodin,
-      apiFixtureId: p.apiFixtureId,
-      apiLeagueId: p.apiLeagueId,
-      apiDate: p.fecha,
-      apiStatus: p.estado
+      apiFixtureId: p.apiFixtureId ? String(p.apiFixtureId) : '',
+      apiLeagueId: p.apiLeagueId ? String(p.apiLeagueId) : '',
+      apiDate: p.fecha || '',
+      apiStatus: p.estado || ''
     }));
 
     await Jornada.findOneAndUpdate(
@@ -384,59 +391,190 @@ app.post('/api/jornadas/comodin', async (req, res) => {
 
 app.get('/api/football/fixtures', async (req, res) => {
   try {
-    const { date, league, season } = req.query;
+    const { date, from, to, league } = req.query;
 
-    if (!process.env.API_FOOTBALL_KEY) {
+    if (!process.env.APIFOOTBALL_COM_KEY) {
       return res.status(500).json({
-        error: 'Falta configurar API_FOOTBALL_KEY en el .env'
+        error: 'Falta configurar APIFOOTBALL_COM_KEY en el .env'
       });
     }
 
-    if (!date) {
+    const fechaInicio = from || date;
+    const fechaFin = to || date;
+
+    if (!fechaInicio || !fechaFin) {
       return res.status(400).json({
-        error: 'Debe enviar date=YYYY-MM-DD'
+        error: 'Debe enviar date=YYYY-MM-DD o from/to'
       });
     }
 
     const params = {
-      date,
+      action: 'get_events',
+      from: fechaInicio,
+      to: fechaFin,
+      APIkey: process.env.APIFOOTBALL_COM_KEY,
       timezone: 'America/Costa_Rica'
     };
 
-    if (league) params.league = league;
-    if (season) params.season = season;
+    if (league) {
+      params.league_id = league;
+    }
 
-    const response = await footballApi.get('/fixtures', { params });
+    const response = await apiFootballCom.get('', { params });
 
-    const partidos = response.data.response.map(item => ({
-      apiFixtureId: item.fixture.id,
-      fecha: item.fixture.date,
-      estado: item.fixture.status.short,
-      minuto: item.fixture.status.elapsed,
-      liga: item.league.name,
-      pais: item.league.country,
-      temporada: item.league.season,
-      apiLeagueId: item.league.id,
-      equipo1: item.teams.home.name,
-      equipo2: item.teams.away.name,
-      marcador1: item.goals.home,
-      marcador2: item.goals.away
+    if (!Array.isArray(response.data)) {
+      console.log('Respuesta APIfootball.com:', response.data);
+      return res.json([]);
+    }
+
+    const partidos = response.data.map(item => ({
+      apiFixtureId: Number(item.match_id),
+      fecha: `${item.match_date} ${item.match_time}`,
+      estado: item.match_status || 'NS',
+      minuto: null,
+      liga: item.league_name || '',
+      pais: item.country_name || '',
+      temporada: '',
+      apiLeagueId: Number(item.league_id),
+      equipo1: item.match_hometeam_name,
+      equipo2: item.match_awayteam_name,
+      marcador1: item.match_hometeam_score !== '' ? Number(item.match_hometeam_score) : null,
+      marcador2: item.match_awayteam_score !== '' ? Number(item.match_awayteam_score) : null
     }));
 
     res.json(partidos);
+
   } catch (error) {
-    console.error('Error al consultar fixtures:', error.response?.data || error.message);
+    console.error('Error consultando APIfootball.com:', error.response?.data || error.message);
     res.status(500).json({ error: 'Error al consultar partidos externos' });
   }
 });
+
+app.get('/api/football/leagues', async (req, res) => {
+  try {
+    const response = await apiFootballCom.get('', {
+      params: {
+        action: 'get_leagues',
+        APIkey: process.env.APIFOOTBALL_COM_KEY
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    res.status(500).json({ error: 'Error consultando ligas' });
+  }
+});
+
+app.get('/api/football/leagues-test', async (req, res) => {
+  try {
+    const response = await apiFootballCom.get('', {
+      params: {
+        action: 'get_leagues',
+        APIkey: process.env.APIFOOTBALL_COM_KEY
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json(error.response?.data || { error: error.message });
+  }
+});
+
+
+function obtenerNumeroSeguro(valor) {
+  if (valor === null || valor === undefined || valor === '') return '';
+  const numero = Number(valor);
+  return Number.isNaN(numero) ? '' : numero;
+}
+
+function obtenerMarcador90Minutos(fixture) {
+  const posiblesLocal = [
+    fixture.match_hometeam_ft_score,
+    fixture.match_hometeam_fulltime_score,
+    fixture.match_hometeam_score_ft,
+    fixture.match_hometeam_score
+  ];
+
+  const posiblesVisitante = [
+    fixture.match_awayteam_ft_score,
+    fixture.match_awayteam_fulltime_score,
+    fixture.match_awayteam_score_ft,
+    fixture.match_awayteam_score
+  ];
+
+  return {
+    marcador1: obtenerNumeroSeguro(posiblesLocal.find(v => v !== undefined && v !== null && v !== '')),
+    marcador2: obtenerNumeroSeguro(posiblesVisitante.find(v => v !== undefined && v !== null && v !== ''))
+  };
+}
+
+function normalizarEquipo(nombre) {
+  return (nombre || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extraerFechaApi(apiDate) {
+  if (!apiDate) return '';
+  return String(apiDate).split(' ')[0].split('T')[0];
+}
+
+async function buscarEventoPorId(matchId) {
+  if (!matchId) return null;
+
+  const response = await apiFootballCom.get('', {
+    params: {
+      action: 'get_events',
+      match_id: String(matchId),
+      APIkey: process.env.APIFOOTBALL_COM_KEY
+    }
+  });
+
+  return Array.isArray(response.data) ? response.data[0] : null;
+}
+
+async function buscarEventoPorFallback(partido) {
+  const fecha = extraerFechaApi(partido.apiDate);
+  if (!fecha) return null;
+
+  const params = {
+    action: 'get_events',
+    from: fecha,
+    to: fecha,
+    APIkey: process.env.APIFOOTBALL_COM_KEY
+  };
+
+  if (partido.apiLeagueId) {
+    params.league_id = partido.apiLeagueId;
+  }
+
+  const response = await apiFootballCom.get('', { params });
+  const eventos = Array.isArray(response.data) ? response.data : [];
+
+  const equipo1 = normalizarEquipo(partido.equipo1);
+  const equipo2 = normalizarEquipo(partido.equipo2);
+
+  return eventos.find(evento => {
+    const local = normalizarEquipo(evento.match_hometeam_name);
+    const visita = normalizarEquipo(evento.match_awayteam_name);
+
+    return local === equipo1 && visita === equipo2;
+  }) || null;
+}
 
 app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
   try {
     const { jornada } = req.params;
 
-    if (!process.env.API_FOOTBALL_KEY) {
+    if (!process.env.APIFOOTBALL_COM_KEY) {
       return res.status(500).json({
-        error: 'Falta configurar API_FOOTBALL_KEY en el .env'
+        error: 'Falta configurar APIFOOTBALL_COM_KEY en el .env'
       });
     }
 
@@ -449,7 +587,17 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
     const resultadosActualizados = [];
 
     for (const partido of jornadaDoc.partidos) {
-      if (!partido.apiFixtureId) {
+      let fixture = null;
+
+      if (partido.apiFixtureId) {
+        fixture = await buscarEventoPorId(partido.apiFixtureId);
+      }
+
+      if (!fixture) {
+        fixture = await buscarEventoPorFallback(partido);
+      }
+
+      if (!fixture) {
         resultadosActualizados.push({
           equipo1: partido.equipo1,
           marcador1: '',
@@ -460,46 +608,30 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
         continue;
       }
 
-      const response = await footballApi.get('/fixtures', {
-        params: { id: partido.apiFixtureId }
-      });
-
-      const fixture = response.data.response[0];
-
-      if (!fixture) continue;
-
-      partido.apiStatus = fixture.fixture.status.short;
+      const marcador90 = obtenerMarcador90Minutos(fixture);
 
       resultadosActualizados.push({
-        equipo1: fixture.teams.home.name,
-        marcador1: fixture.goals.home,
-        equipo2: fixture.teams.away.name,
-        marcador2: fixture.goals.away,
+        equipo1: fixture.match_hometeam_name || partido.equipo1,
+        marcador1: marcador90.marcador1,
+        equipo2: fixture.match_awayteam_name || partido.equipo2,
+        marcador2: marcador90.marcador2,
         comodin: partido.comodin
       });
     }
-
-    await jornadaDoc.save();
-
-    await ResultadoOficial.findOneAndUpdate(
-      { jornada },
-      {
-        jornada,
-        resultados: resultadosActualizados
-      },
-      { upsert: true, new: true }
-    );
 
     res.json({
       success: true,
       jornada,
       resultados: resultadosActualizados
     });
+
   } catch (error) {
     console.error('Error sincronizando resultados oficiales:', error.response?.data || error.message);
     res.status(500).json({ error: 'Error sincronizando resultados oficiales' });
   }
 });
+
+
 
 /* ================= API: Resultados ================= */
 

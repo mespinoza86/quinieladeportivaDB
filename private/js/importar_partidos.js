@@ -31,6 +31,103 @@ document.addEventListener('DOMContentLoaded', () => {
             .trim();
     }
 
+    function parseFiltroTorneo(valor) {
+        const filtro = {};
+
+        if (!valor || valor === 'custom') {
+            return filtro;
+        }
+
+        valor.split(';').forEach(parte => {
+            const [key, value] = parte.split('=');
+
+            if (key && value) {
+                filtro[key.trim()] = value.trim();
+            }
+        });
+
+        return filtro;
+    }
+
+    function esLigaNoPermitida(liga) {
+        const texto = normalizarTexto(liga);
+    
+        const palabrasBloqueadas = [
+            'u20',
+            'u21',
+            'u23',
+            'sub 20',
+            'sub 21',
+            'sub 23',
+            'reserves',
+            'reserve',
+            'femenil',
+            'women',
+            'womens',
+            'femenina',
+            'feminine',
+            'juvenil',
+            'youth'
+        ];
+
+        return palabrasBloqueadas.some(palabra =>
+            texto.includes(normalizarTexto(palabra))
+        );
+    }
+
+    function partidoCoincideConFiltro(partido, filtro) {
+        const liga = normalizarTexto(partido.liga);
+        const pais = normalizarTexto(partido.pais);
+
+        if (esLigaNoPermitida(partido.liga)) {
+            return false;
+        }
+
+        if (filtro.country && pais !== normalizarTexto(filtro.country)) {
+            return false;
+        }
+
+        if (filtro.league_exact) {
+            const ligaEsperada = normalizarTexto(filtro.league_exact);
+        
+            if (
+                liga !== ligaEsperada &&
+                !liga.includes(ligaEsperada)
+            ) {
+                return false;
+            }
+        }
+
+
+        if (filtro.league_contains && !liga.includes(normalizarTexto(filtro.league_contains))) {
+            return false;
+        }
+
+        if (filtro.league_any) {
+            const opciones = filtro.league_any
+                .split('|')
+                .map(opcion => normalizarTexto(opcion));
+
+            const coincideAlguna = opciones.some(opcion =>
+                liga.includes(opcion)
+            );
+
+            if (!coincideAlguna) {
+                return false;
+            }
+        }
+
+
+        if (filtro.text) {
+            const texto = normalizarTexto(filtro.text);
+            return `${liga} ${pais}`.includes(texto);
+        }
+
+        return true;
+    }
+
+
+
     function mostrarEstado(mensaje) {
         estadoBusqueda.style.display = 'block';
         estadoBusqueda.textContent = mensaje;
@@ -72,16 +169,21 @@ document.addEventListener('DOMContentLoaded', () => {
             let partidos = Array.isArray(data) ? data : [];
 
             if (filtroLiga) {
-                const filtro = normalizarTexto(filtroLiga);
+                let filtroTorneo;
 
-                partidos = partidos.filter(partido => {
-                    const liga = normalizarTexto(partido.liga);
-                    const pais = normalizarTexto(partido.pais);
-                    const combinado = `${liga} ${pais}`;
+                if (torneoSelect.value === 'custom') {
+                    filtroTorneo = {
+                        text: filtroLiga
+                    };
+                } else {
+                    filtroTorneo = parseFiltroTorneo(filtroLiga);
+                }
 
-                    return combinado.includes(filtro);
-                });
+                partidos = partidos.filter(partido =>
+                    partidoCoincideConFiltro(partido, filtroTorneo)
+                );
             }
+
 
             partidosDisponibles = partidos;
 
@@ -252,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         partidosPreliminares.forEach((partido, index) => {
             const card = document.createElement('div');
             card.className = 'match-card';
-
+    
             const fechaLocal = partido.fecha
                 ? new Date(partido.fecha).toLocaleString('es-CR', {
                     timeZone: 'America/Costa_Rica',
@@ -263,17 +365,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <div class="match-teams">
-                    <strong>${partido.equipo1}</strong>
+                    <input
+                        type="text"
+                        class="equipo-preliminar-input"
+                        data-index="${index}"
+                        data-campo="equipo1"
+                        value="${partido.equipo1 || ''}"
+                    />
+
                     <span class="vs">vs</span>
-                    <strong>${partido.equipo2}</strong>
+
+                    <input
+                        type="text"
+                        class="equipo-preliminar-input"
+                        data-index="${index}"
+                        data-campo="equipo2"
+                        value="${partido.equipo2 || ''}"
+                    />
                 </div>
 
                 <div class="match-meta">
                     <span>${partido.liga || ''}</span>
                     <span>${partido.pais || ''}</span>
                     <span>${fechaLocal}</span>
-                    <span>${partido.comodin ? 'Comodín' : 'Normal'}</span>
                 </div>
+
+                <label class="field-label" style="margin-top:10px;">
+                    Comodín
+                </label>
+
+                <select class="comodin-preliminar-select" data-index="${index}">
+                    <option value="false" ${!partido.comodin ? 'selected' : ''}>
+                        No
+                    </option>
+                    <option value="true" ${partido.comodin ? 'selected' : ''}>
+                        Sí
+                    </option>
+                </select>
 
                 <button
                     type="button"
@@ -288,6 +416,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         preliminarContainer
+            .querySelectorAll('.equipo-preliminar-input')
+            .forEach(input => {
+                input.addEventListener('input', () => {
+                    const index = Number(input.dataset.index);
+                    const campo = input.dataset.campo;
+
+                    partidosPreliminares[index][campo] = input.value.trim();
+                });
+            });
+
+        preliminarContainer
+            .querySelectorAll('.comodin-preliminar-select')
+            .forEach(select => {
+                select.addEventListener('change', () => {
+                    const index = Number(select.dataset.index);
+                    partidosPreliminares[index].comodin = select.value === 'true';
+                });
+            });
+
+        preliminarContainer
             .querySelectorAll('[data-remove-index]')
             .forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -298,6 +446,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
     }
+
+
+
 
     crearButton.addEventListener('click', async () => {
         const nombre = nombreJornadaInput.value.trim();
