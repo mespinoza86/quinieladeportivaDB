@@ -1,77 +1,96 @@
-let textoResultado = ''; // Guardar el texto para copiar y WhatsApp
+let textoResultado = '';
 
-// Cargar jornadas en el combobox
-async function cargarJornadas() {
-    const combo = document.getElementById('comboJornadas');
-    try {
-        const res = await fetch('/api/jornadas');
-        const jornadas = await res.json();
-        jornadas.forEach(j => {
-            const option = document.createElement('option');
-            option.value = j.nombre;
-            option.textContent = j.nombre;
-            combo.appendChild(option);
-        });
-    } catch (err) {
-        console.error('Error cargando jornadas:', err);
-    }
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const jornadaSelect = document.getElementById('jornadaSelect');
+    const copiarButton = document.getElementById('copiarResultadosButton');
+    const whatsappButton = document.getElementById('enviarWhatsappButton');
+    const resultadoTexto = document.getElementById('resultadoTexto');
 
-// Copiar resultados de todos los jugadores de la jornada seleccionada
-async function copiarResultados() {
-    const jornadaSeleccionada = document.getElementById('comboJornadas').value;
-    if (!jornadaSeleccionada) return alert('Selecciona una jornada');
+    async function cargarJornadas() {
+        try {
+            const res = await fetch('/api/jornadas');
+            const jornadas = await res.json();
 
-    try {
-        const jugadoresRes = await fetch('/api/jugadores');
-        const jugadores = await jugadoresRes.json();
+            jornadaSelect.innerHTML = '<option value="">-- Selecciona --</option>';
 
-        textoResultado = '';
-
-        for (const jugador of jugadores) {
-            const resJugador = await fetch(`/api/resultados-con-equipos/${encodeURIComponent(jugador)}/${encodeURIComponent(jornadaSeleccionada)}`);
-            if (resJugador.status === 404) continue;
-
-            const pronosticos = await resJugador.json();
-            if (pronosticos.length === 0) continue;
-
-            textoResultado += `-------------------------------\n`;
-            textoResultado += `Nombre: ${jugador}\n`;
-            textoResultado += `-------------------------------\n`;
-
-            pronosticos.forEach((p, i) => {
-                textoResultado += `${i + 1}. ${p.equipo1} ${p.marcador1 || '0'}\n`;
-                textoResultado += `   ${p.equipo2} ${p.marcador2 || '0'}\n`;
+            jornadas.forEach(j => {
+                const option = document.createElement('option');
+                option.value = j.nombre;
+                option.textContent = j.nombre;
+                jornadaSelect.appendChild(option);
             });
 
-            textoResultado += `\n`;
+        } catch (err) {
+            console.error('Error cargando jornadas:', err);
+            alert('Error cargando jornadas');
+        }
+    }
+
+    async function copiarResultados() {
+        const jornadaSeleccionada = jornadaSelect.value;
+
+        if (!jornadaSeleccionada) {
+            alert('Selecciona una jornada');
+            return;
         }
 
-        if (!textoResultado) textoResultado = 'No hay resultados disponibles para esta jornada.';
+        try {
+            const jugadoresRes = await fetch('/api/jugadores');
+            const jugadores = await jugadoresRes.json();
 
-        await navigator.clipboard.writeText(textoResultado);
-        document.getElementById('resultados').textContent = textoResultado;
+            textoResultado = '';
 
-        alert('Resultados copiados al portapapeles');
+            for (const jugador of jugadores) {
+                const resJugador = await fetch(
+                    `/api/resultados-con-equipos/${encodeURIComponent(jugador)}/${encodeURIComponent(jornadaSeleccionada)}`
+                );
 
-    } catch (err) {
-        console.error('Error copiando resultados:', err);
-        alert('Error al copiar resultados');
+                if (resJugador.status === 404) continue;
+
+                const pronosticos = await resJugador.json();
+
+                if (!Array.isArray(pronosticos) || pronosticos.length === 0) continue;
+
+                textoResultado += `-------------------------------\n`;
+                textoResultado += `Nombre: ${jugador}\n`;
+                textoResultado += `-------------------------------\n`;
+
+                pronosticos.forEach((p, i) => {
+                    textoResultado += `${i + 1}. ${p.equipo1} ${p.marcador1 || '0'}\n`;
+                    textoResultado += `   ${p.equipo2} ${p.marcador2 || '0'}\n`;
+                });
+
+                textoResultado += `\n`;
+            }
+
+            if (!textoResultado) {
+                textoResultado = 'No hay resultados disponibles para esta jornada.';
+            }
+
+            resultadoTexto.value = textoResultado;
+
+            await navigator.clipboard.writeText(textoResultado);
+
+            alert('Resultados copiados al portapapeles');
+
+        } catch (err) {
+            console.error('Error copiando resultados:', err);
+            alert('Error al copiar resultados');
+        }
     }
-}
 
-// Enviar resultados por WhatsApp
-function enviarWhatsApp() {
-    if (!textoResultado) {
-        alert('Primero genera los resultados copiándolos');
-        return;
+    function enviarWhatsApp() {
+        if (!textoResultado) {
+            alert('Primero genera los resultados copiándolos');
+            return;
+        }
+
+        const url = `https://wa.me/?text=${encodeURIComponent(textoResultado)}`;
+        window.open(url, '_blank');
     }
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoResultado)}`;
-    window.open(url, '_blank');
-}
 
-// Inicialización
-document.getElementById('btnCopiar').addEventListener('click', copiarResultados);
-document.getElementById('btnWhatsapp').addEventListener('click', enviarWhatsApp);
-cargarJornadas();
+    copiarButton.addEventListener('click', copiarResultados);
+    whatsappButton.addEventListener('click', enviarWhatsApp);
 
+    cargarJornadas();
+});

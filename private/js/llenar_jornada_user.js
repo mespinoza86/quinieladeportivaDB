@@ -111,6 +111,10 @@ function mostrarPartidos(partidos, fechaCierre) {
         const partidoDiv = document.createElement('div');
 
         partidoDiv.classList.add('partido-container');
+        partidoDiv.dataset.equipo1 = partido.equipo1 || '';
+        partidoDiv.dataset.equipo2 = partido.equipo2 || '';
+        partidoDiv.dataset.comodin = partido.comodin ? 'true' : 'false';
+
 
         const estiloNegrita = partido.comodin
             ? 'font-weight: bold;'
@@ -164,6 +168,7 @@ function mostrarPartidos(partidos, fechaCierre) {
 function copiarResultados() {
     const nombreJugador = document.getElementById('comboJugadores').value;
     const partidosContainer = document.getElementById('partidosContainer');
+
     let textoResultado = '';
     let contador = 1;
 
@@ -174,28 +179,37 @@ function copiarResultados() {
     Array.from(partidosContainer.children)
         .filter(div => div.classList.contains('partido-container'))
         .forEach((partidoDiv, index) => {
-            const equipo1 = partidoDiv.children[0].textContent;
-            const resultado1 = document.getElementById(`resultadoEquipo1_${index}`).value || '0';
-            const equipo2 = partidoDiv.children[4].textContent;
-            const resultado2 = document.getElementById(`resultadoEquipo2_${index}`).value || '0';
-            const comodin = partidoDiv.querySelector('label:last-child').textContent.includes('Sí');
+            const equipo1 = partidoDiv.dataset.equipo1 || '';
+            const equipo2 = partidoDiv.dataset.equipo2 || '';
+
+            const resultado1 = document.getElementById(`resultadoEquipo1_${index}`)?.value || '0';
+            const resultado2 = document.getElementById(`resultadoEquipo2_${index}`)?.value || '0';
+
+            const comodin = partidoDiv.dataset.comodin === 'true';
             const formato = comodin ? '*' : '';
 
-        if (comodin) textoResultado += "\n*(Comodin)*";
-        textoResultado += `\n${contador}. ${formato}${equipo1} ${resultado1}${formato}\n  ${formato}${equipo2} ${resultado2}${formato}\n`;
-        contador++;
-    });
+            if (comodin) textoResultado += "\n*(Comodín)*";
 
-    
-    
-    navigator.clipboard.writeText(textoResultado).then(() => {
-        alert('Texto copiado al portapapeles');
-    });
+            textoResultado += `\n${contador}. ${formato}${equipo1} ${resultado1}${formato}\n  ${formato}${equipo2} ${resultado2}${formato}\n`;
+
+            contador++;
+        });
+
+    navigator.clipboard.writeText(textoResultado)
+        .then(() => {
+            alert('Texto copiado al portapapeles');
+        })
+        .catch(error => {
+            console.error('Error copiando texto:', error);
+            alert('No se pudo copiar el texto.');
+        });
 }
+
 
 function enviarPorWhatsapp() {
     const nombreJugador = document.getElementById('comboJugadores').value;
     const partidosContainer = document.getElementById('partidosContainer');
+
     let textoResultado = '';
     let contador = 1;
 
@@ -204,22 +218,28 @@ function enviarPorWhatsapp() {
     textoResultado += `-------------------------------\n`;
 
     Array.from(partidosContainer.children)
-     .filter(div => div.classList.contains('partido-container'))
-     .forEach((partidoDiv, index) => {
-        const equipo1 = partidoDiv.children[0].textContent;
-        const resultado1 = document.getElementById(`resultadoEquipo1_${index}`).value || '0';
-        const equipo2 = partidoDiv.children[4].textContent;
-        const resultado2 = document.getElementById(`resultadoEquipo2_${index}`).value || '0';
-        const comodin = partidoDiv.querySelector('label:last-child').textContent.includes('Sí');
-        const formato = comodin ? '*' : '';
+        .filter(div => div.classList.contains('partido-container'))
+        .forEach((partidoDiv, index) => {
+            const equipo1 = partidoDiv.dataset.equipo1 || '';
+            const equipo2 = partidoDiv.dataset.equipo2 || '';
 
-        textoResultado += `\n${contador}. ${formato}${equipo1} ${resultado1}${formato}\n  ${formato}${equipo2} ${resultado2}${formato}\n`;
-        contador++;
-    });
-    
+            const resultado1 = document.getElementById(`resultadoEquipo1_${index}`)?.value || '0';
+            const resultado2 = document.getElementById(`resultadoEquipo2_${index}`)?.value || '0';
+
+            const comodin = partidoDiv.dataset.comodin === 'true';
+            const formato = comodin ? '*' : '';
+
+            if (comodin) textoResultado += "\n*(Comodín)*";
+
+            textoResultado += `\n${contador}. ${formato}${equipo1} ${resultado1}${formato}\n  ${formato}${equipo2} ${resultado2}${formato}\n`;
+
+            contador++;
+        });
+
     const mensajeWhatsapp = encodeURIComponent(textoResultado);
     window.open(`https://wa.me/?text=${mensajeWhatsapp}`, '_blank');
 }
+
 
 
 function pedirPasswordModal(jugador) {
