@@ -125,12 +125,14 @@ const ResultadoSchema = new mongoose.Schema({
 
 const ResultadoOficialSchema = new mongoose.Schema({
   jornada: String,
-  resultados: [{
-    equipo1: String,
-    marcador1: Number,
-    equipo2: String,
-    marcador2: Number,
-    comodin: { type: Boolean, default: false }
+    resultados: [{
+      equipo1: String,
+      logoEquipo1: String,
+      marcador1: Number,
+      equipo2: String,
+      logoEquipo2: String,
+      marcador2: Number,
+      comodin: { type: Boolean, default: false }
   }]
 });
 
@@ -605,10 +607,12 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
 
       if (!fixture) {
         resultadosActualizados.push({
-          equipo1: partido.equipo1,
-          marcador1: '',
-          equipo2: partido.equipo2,
-          marcador2: '',
+          equipo1: fixture.match_hometeam_name || partido.equipo1,
+          logoEquipo1: partido.logoEquipo1 || '',
+          marcador1: marcador90.marcador1,
+          equipo2: fixture.match_awayteam_name || partido.equipo2,
+          logoEquipo2: partido.logoEquipo2 || '',
+          marcador2: marcador90.marcador2,
           comodin: partido.comodin
         });
         continue;
@@ -616,13 +620,15 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
 
       const marcador90 = obtenerMarcador90Minutos(fixture);
 
-      resultadosActualizados.push({
-        equipo1: fixture.match_hometeam_name || partido.equipo1,
-        marcador1: marcador90.marcador1,
-        equipo2: fixture.match_awayteam_name || partido.equipo2,
-        marcador2: marcador90.marcador2,
-        comodin: partido.comodin
-      });
+        resultadosActualizados.push({
+          equipo1: fixture.match_hometeam_name || partido.equipo1,
+          logoEquipo1: partido.logoEquipo1 || '',
+          marcador1: marcador90.marcador1,
+          equipo2: fixture.match_awayteam_name || partido.equipo2,
+          logoEquipo2: partido.logoEquipo2 || '',
+          marcador2: marcador90.marcador2,
+          comodin: partido.comodin
+        });
     }
 
     res.json({
@@ -689,9 +695,25 @@ app.get('/api/resultados-oficiales', async (req, res) => {
 app.post('/api/resultados-oficiales', async (req, res) => {
   const { jornada, resultados } = req.body;
 
+  const jornadaDoc = await Jornada.findOne({ nombre: jornada });
+
+  const resultadosConLogos = resultados.map((r, index) => {
+    const partidoJornada = jornadaDoc?.partidos?.[index];
+
+    return {
+      equipo1: r.equipo1,
+      logoEquipo1: r.logoEquipo1 || partidoJornada?.logoEquipo1 || '',
+      marcador1: r.marcador1,
+      equipo2: r.equipo2,
+      logoEquipo2: r.logoEquipo2 || partidoJornada?.logoEquipo2 || '',
+      marcador2: r.marcador2,
+      comodin: r.comodin
+    };
+  });
+
   await ResultadoOficial.findOneAndUpdate(
     { jornada },
-    { jornada, resultados },
+    { jornada, resultados: resultadosConLogos },
     { upsert: true }
   );
 
@@ -703,6 +725,7 @@ app.post('/api/resultados-oficiales', async (req, res) => {
 
   res.json(resultadosArray);
 });
+
 
 app.get('/api/resultados-oficiales/:jornada', async (req, res) => {
   try {
@@ -723,7 +746,9 @@ app.get('/api/resultados-oficiales/:jornada', async (req, res) => {
 
       return {
         equipo1: p.equipo1,
+        logoEquipo1: p.logoEquipo1 || '',
         equipo2: p.equipo2,
+        logoEquipo2: p.logoEquipo2 || '',
         marcador1: r?.marcador1 != null ? r.marcador1 : '',
         marcador2: r?.marcador2 != null ? r.marcador2 : '',
         comodin: p.comodin

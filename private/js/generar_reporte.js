@@ -1,30 +1,32 @@
+document.addEventListener('DOMContentLoaded', () => {
   const { jsPDF } = window.jspdf;
 
   const jornadaSelect = document.getElementById('jornadaSelect');
   const generarPdfBtn = document.getElementById('generarPdfBtn');
 
   function limpiarTexto(texto) {
-    return texto
+    return (texto || '')
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // quita tildes
-      .replace(/[^\w\s]/gi, '')        // quita símbolos raros
-      .replace(/\s+/g, ' ')            // elimina espacios múltiples
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s]/gi, '')
+      .replace(/\s+/g, ' ')
       .trim();
   }
 
-async function cargarJornadas() {
-  const res = await fetch('/api/jornadas');
-  const jornadas = await res.json();
-  jornadaSelect.innerHTML = '';
-  jornadas.forEach(j => {
-    // Suponiendo que j = { nombre: "Jornada 1" }
-    const jornadaNombre = j.nombre; 
-    const opt = document.createElement('option');
-    opt.value = jornadaNombre;
-    opt.textContent = jornadaNombre;
-    jornadaSelect.appendChild(opt);
-  });
-}
+  async function cargarJornadas() {
+    const res = await fetch('/api/jornadas');
+    const jornadas = await res.json();
+
+    jornadaSelect.innerHTML = '';
+
+    jornadas.forEach(j => {
+      const jornadaNombre = j.nombre;
+      const opt = document.createElement('option');
+      opt.value = jornadaNombre;
+      opt.textContent = jornadaNombre;
+      jornadaSelect.appendChild(opt);
+    });
+  }
 
   async function cargarJugadores() {
     const res = await fetch('/api/jugadores');
@@ -41,14 +43,12 @@ async function cargarJornadas() {
     return await res.json();
   }
 
-  // Función para determinar resultado (ganó, perdió, empató)
   function determinarResultado(marcador1, marcador2) {
     if (marcador1 > marcador2) return 'gano';
     if (marcador1 < marcador2) return 'perdio';
     return 'empato';
   }
 
-  // Lógica EXACTA para calcular puntos, como en tu endpoint
   function calcularPuntosPronosticados(pronosticado, oficial) {
     if (
       !pronosticado || !oficial ||
@@ -69,46 +69,15 @@ async function cargarJornadas() {
 
     let puntosJornada = 0;
 
-    if (resultadoOficialEquipo1 === resultadoPronosticoEquipo1 &&
-        marcador1Pronostico !== "" && marcador2Pronostico !== "" &&
-        marcador1Pronostico !== null && marcador2Pronostico !== null) {
-      if (marcador1Oficial !== "" && marcador2Oficial !== "" &&
-          marcador1Oficial !== null && marcador2Oficial !== null &&
-          comodin === false) {
-        puntosJornada += 3; // 3 puntos por acertar resultado (ganó, empató, perdió)
-      }
+    if (resultadoOficialEquipo1 === resultadoPronosticoEquipo1) {
+      puntosJornada += comodin ? 4 : 3;
     }
 
-    if (resultadoOficialEquipo1 === resultadoPronosticoEquipo1 &&
-        marcador1Pronostico !== "" && marcador2Pronostico !== "" &&
-        marcador1Pronostico !== null && marcador2Pronostico !== null) {
-      if (marcador1Oficial !== "" && marcador2Oficial !== "" &&
-          marcador1Oficial !== null && marcador2Oficial !== null &&
-          comodin === true) {
-        puntosJornada += 4; // 4 puntos por acertar resultado en comodín
-      }
-    }
-
-    if (marcador1Oficial === marcador1Pronostico &&
-        marcador2Oficial === marcador2Pronostico &&
-        marcador1Pronostico !== "" && marcador2Pronostico !== "" &&
-        marcador1Pronostico !== null && marcador2Pronostico !== null) {
-      if (marcador1Oficial !== "" && marcador2Oficial !== "" &&
-          marcador1Oficial !== null && marcador2Oficial !== null &&
-          comodin === false) {
-        puntosJornada += 2; // 2 puntos por acertar marcador exacto
-      }
-    }
-
-    if (marcador1Oficial === marcador1Pronostico &&
-        marcador2Oficial === marcador2Pronostico &&
-        marcador1Pronostico !== "" && marcador2Pronostico !== "" &&
-        marcador1Pronostico !== null && marcador2Pronostico !== null) {
-      if (marcador1Oficial !== "" && marcador2Oficial !== "" &&
-          marcador1Oficial !== null && marcador2Oficial !== null &&
-          comodin === true) {
-        puntosJornada += 3; // 3 puntos por acertar marcador exacto en comodín
-      }
+    if (
+      marcador1Oficial === marcador1Pronostico &&
+      marcador2Oficial === marcador2Pronostico
+    ) {
+      puntosJornada += comodin ? 3 : 2;
     }
 
     return puntosJornada;
@@ -121,8 +90,9 @@ async function cargarJornadas() {
     );
   }
 
-  generarPdfBtn.onclick = async () => {
+  generarPdfBtn.addEventListener('click', async () => {
     const jornadaSeleccionada = jornadaSelect.value;
+
     if (!jornadaSeleccionada) {
       alert('Selecciona una jornada primero');
       return;
@@ -139,7 +109,7 @@ async function cargarJornadas() {
       return;
     }
 
-    const partidosOficial = jornadaOficial ? jornadaOficial.partidos : null;
+    const partidosOficial = jornadaOficial.partidos || [];
 
     const doc = new jsPDF();
     doc.setFont("times", "normal");
@@ -161,19 +131,18 @@ async function cargarJornadas() {
     y += 10;
 
     for (const jugador of jugadores) {
-      // Nombre jugador en negrita y tamaño 14
       doc.setFont("times", "bold");
       doc.setFontSize(14);
       doc.text(`Jugador: ${limpiarTexto(jugador)}`, 10, y);
       y += 4;
 
-      // Línea horizontal debajo del nombre
       doc.setLineWidth(0.5);
       doc.line(10, y, 200, y);
       y += 8;
 
       const clave = `${jugador}_${jornadaSeleccionada}`;
       const resultadoJugador = resultados.find(r => r[0] === clave);
+
       if (!resultadoJugador) {
         doc.setFont("times", "normal");
         doc.setFontSize(12);
@@ -185,7 +154,6 @@ async function cargarJornadas() {
       const partidosPronosticados = resultadoJugador[1];
       let puntosTotales = 0;
 
-      // Encabezados columnas en normal
       doc.setFont("times", "normal");
       doc.setFontSize(12);
       doc.text('Partido', 10, y);
@@ -194,7 +162,6 @@ async function cargarJornadas() {
       doc.text('Pts', 170, y);
       y += 4;
 
-      // Línea horizontal después encabezado
       doc.setLineWidth(0.3);
       doc.line(10, y, 200, y);
       y += 6;
@@ -218,7 +185,6 @@ async function cargarJornadas() {
         y += 6;
 
         if (index === partidosPronosticados.length - 1) {
-          // Línea horizontal después del último partido
           doc.setLineWidth(0.3);
           doc.line(10, y, 200, y);
           y += 8;
@@ -231,18 +197,15 @@ async function cargarJornadas() {
         }
       });
 
-      // Línea arriba de puntos totales
       doc.setLineWidth(0.5);
       doc.line(10, y, 200, y);
       y += 6;
 
-      // Puntos totales en negrita y tamaño 13
       doc.setFont("times", "bold");
       doc.setFontSize(13);
       doc.text(`Puntos totales: ${puntosTotales}`, 10, y);
       y += 8;
 
-      // Línea abajo de puntos totales
       doc.setLineWidth(0.5);
       doc.line(10, y, 200, y);
       y += 10;
@@ -255,6 +218,7 @@ async function cargarJornadas() {
     }
 
     doc.save(`Resultados_${limpiarTexto(jornadaSeleccionada)}.pdf`);
-  };
+  });
 
   cargarJornadas();
+});

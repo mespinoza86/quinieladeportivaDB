@@ -91,6 +91,12 @@ function pedirPassword() {
         return Number.isFinite(n);
     }
 
+    function logoHTML(url, nombre) {
+        if (!url) return '';
+        return `<img src="${url}" class="team-logo" alt="${nombre || 'Equipo'}">`;
+    }
+
+
     // Calcular puntos
     function calcularPuntos(pronostico, resultadoOficial) {
         if (!pronostico || !resultadoOficial) return 0;
@@ -202,8 +208,36 @@ function pedirPassword() {
                             ? `${resultadoOficialCorrespondiente.marcador1}-${resultadoOficialCorrespondiente.marcador2}`
                             : 'N/A';
 
-                        partidoDiv.innerHTML = `${partidoPronosticado.equipo1} ${partidoPronosticado.marcador1} - ${partidoPronosticado.marcador2} ${partidoPronosticado.equipo2} | Oficial: ${oficialTexto} | Puntos: ${puntos}`;
+                        //partidoDiv.innerHTML = `${partidoPronosticado.equipo1} ${partidoPronosticado.marcador1} - ${partidoPronosticado.marcador2} ${partidoPronosticado.equipo2} | Oficial: ${oficialTexto} | Puntos: ${puntos}`;
+                        //resultadosContainer.appendChild(partidoDiv);
+                        partidoDiv.classList.add('match-card');
+
+                        partidoDiv.innerHTML = `
+                            <div class="match-teams">
+                                <div class="team-side">
+                                    ${logoHTML(partidoPronosticado.logoEquipo1, partidoPronosticado.equipo1)}
+                                    <strong>${partidoPronosticado.equipo1}</strong>
+                                </div>
+
+                                <span class="match-score">
+                                    ${partidoPronosticado.marcador1} - ${partidoPronosticado.marcador2}
+                                </span>
+
+                                <div class="team-side">
+                                    ${logoHTML(partidoPronosticado.logoEquipo2, partidoPronosticado.equipo2)}
+                                    <strong>${partidoPronosticado.equipo2}</strong>
+                                </div>
+                            </div>
+
+                            <div class="match-meta">
+                                <span>Oficial: ${oficialTexto}</span>
+                                <span>Puntos: ${puntos}</span>
+                                ${resultadoOficialCorrespondiente?.comodin ? '<span>Comodín</span>' : ''}
+                            </div>
+                        `;
+
                         resultadosContainer.appendChild(partidoDiv);
+
                     });
 
                     totalPuntosContainer.innerHTML = `<h3>Total de Puntos Obtenidos: ${totalPuntos}</h3>`;
