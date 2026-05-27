@@ -461,6 +461,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+    function convertirFechaCierreACostaRicaISO(valorDatetimeLocal) {
+        if (!valorDatetimeLocal) return null;
+
+        // Costa Rica es UTC-6 todo el año
+        const fechaCostaRica = new Date(`${valorDatetimeLocal}:00-06:00`);
+        return fechaCostaRica.toISOString();
+    }
+
+
     crearButton.addEventListener('click', async () => {
         const nombre = nombreJornadaInput.value.trim();
 
@@ -482,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     nombre,
-                    fechaCierre: fechaCierreInput.value || null,
+                    fechaCierre: convertirFechaCierreACostaRicaISO(fechaCierreInput.value),
                     partidos: partidosPreliminares
                 })
             });
