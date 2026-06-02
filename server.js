@@ -631,6 +631,7 @@ async function sincronizarTodasLasJornadasDesdeApi() {
   }
 }
 
+
 app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
   try {
     const { jornada } = req.params;
@@ -664,10 +665,10 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
         resultadosActualizados.push({
           equipo1: partido.equipo1,
           logoEquipo1: partido.logoEquipo1 || '',
-          marcador1: '',
+          marcador1: null,
           equipo2: partido.equipo2,
           logoEquipo2: partido.logoEquipo2 || '',
-          marcador2: '',
+          marcador2: null,
           comodin: partido.comodin
         });
         continue;
@@ -693,6 +694,15 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
       });
     }
 
+    await ResultadoOficial.findOneAndUpdate(
+      { jornada },
+      {
+        jornada,
+        resultados: resultadosActualizados
+      },
+      { upsert: true, new: true }
+    );
+
     res.json({
       success: true,
       jornada,
@@ -704,8 +714,6 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
     res.status(500).json({ error: 'Error sincronizando resultados oficiales' });
   }
 });
-
-
 
 /* ================= API: Resultados ================= */
 
