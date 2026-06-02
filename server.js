@@ -576,6 +576,7 @@ async function buscarEventoPorFallback(partido) {
   }) || null;
 }
 
+
 app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
   try {
     const { jornada } = req.params;
@@ -607,12 +608,12 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
 
       if (!fixture) {
         resultadosActualizados.push({
-          equipo1: fixture.match_hometeam_name || partido.equipo1,
+          equipo1: partido.equipo1,
           logoEquipo1: partido.logoEquipo1 || '',
-          marcador1: marcador90.marcador1,
-          equipo2: fixture.match_awayteam_name || partido.equipo2,
+          marcador1: '',
+          equipo2: partido.equipo2,
           logoEquipo2: partido.logoEquipo2 || '',
-          marcador2: marcador90.marcador2,
+          marcador2: '',
           comodin: partido.comodin
         });
         continue;
@@ -620,15 +621,22 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
 
       const marcador90 = obtenerMarcador90Minutos(fixture);
 
-        resultadosActualizados.push({
-          equipo1: fixture.match_hometeam_name || partido.equipo1,
-          logoEquipo1: partido.logoEquipo1 || '',
-          marcador1: marcador90.marcador1,
-          equipo2: fixture.match_awayteam_name || partido.equipo2,
-          logoEquipo2: partido.logoEquipo2 || '',
-          marcador2: marcador90.marcador2,
-          comodin: partido.comodin
-        });
+      const home = normalizarEquipo(fixture.match_hometeam_name);
+      const away = normalizarEquipo(fixture.match_awayteam_name);
+      const eq1 = normalizarEquipo(partido.equipo1);
+      const eq2 = normalizarEquipo(partido.equipo2);
+
+      const vieneInvertido = home === eq2 && away === eq1;
+
+      resultadosActualizados.push({
+        equipo1: partido.equipo1,
+        logoEquipo1: partido.logoEquipo1 || '',
+        marcador1: vieneInvertido ? marcador90.marcador2 : marcador90.marcador1,
+        equipo2: partido.equipo2,
+        logoEquipo2: partido.logoEquipo2 || '',
+        marcador2: vieneInvertido ? marcador90.marcador1 : marcador90.marcador2,
+        comodin: partido.comodin
+      });
     }
 
     res.json({
@@ -740,20 +748,28 @@ app.get('/api/resultados-oficiales/:jornada', async (req, res) => {
     const resultadosExistentes = oficial ? oficial.resultados : [];
 
     const partidosConResultados = jornadaDoc.partidos.map(p => {
-      const r = resultadosExistentes.find(r =>
+    let invertido = false;
+
+    let r = resultadosExistentes.find(r =>
         r.equipo1 === p.equipo1 && r.equipo2 === p.equipo2
       );
 
+      if (!r) {
+        r = resultadosExistentes.find(r =>
+          r.equipo1 === p.equipo2 && r.equipo2 === p.equipo1
+        );
+        invertido = !!r;
+      }
+
       return {
         equipo1: p.equipo1,
-        logoEquipo1: p.logoEquipo1 || '',
         equipo2: p.equipo2,
-        logoEquipo2: p.logoEquipo2 || '',
-        marcador1: r?.marcador1 != null ? r.marcador1 : '',
-        marcador2: r?.marcador2 != null ? r.marcador2 : '',
+        marcador1: r ? (invertido ? r.marcador2 : r.marcador1) : '',
+        marcador2: r ? (invertido ? r.marcador1 : r.marcador2) : '',
         comodin: p.comodin
       };
     });
+
 
     res.json({
       nombre: jornadaNombre,
