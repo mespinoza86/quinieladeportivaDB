@@ -20,10 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     jornadaSelect.innerHTML = '';
 
     jornadas.forEach(j => {
-      const jornadaNombre = j.nombre;
       const opt = document.createElement('option');
-      opt.value = jornadaNombre;
-      opt.textContent = jornadaNombre;
+      opt.value = j.nombre;
+      opt.textContent = j.nombre;
       jornadaSelect.appendChild(opt);
     });
   }
@@ -43,6 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return await res.json();
   }
 
+  async function cargarJornada(nombre) {
+    const res = await fetch(`/api/jornadas/${encodeURIComponent(nombre)}`);
+    return await res.json();
+  }
+
   function determinarResultado(marcador1, marcador2) {
     if (marcador1 > marcador2) return 'gano';
     if (marcador1 < marcador2) return 'perdio';
@@ -58,10 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
       oficial.marcador1 == null || oficial.marcador2 == null
     ) return 0;
 
-    const marcador1Oficial = parseInt(oficial.marcador1);
-    const marcador2Oficial = parseInt(oficial.marcador2);
-    const marcador1Pronostico = parseInt(pronosticado.marcador1);
-    const marcador2Pronostico = parseInt(pronosticado.marcador2);
+    const marcador1Oficial = parseInt(oficial.marcador1, 10);
+    const marcador2Oficial = parseInt(oficial.marcador2, 10);
+    const marcador1Pronostico = parseInt(pronosticado.marcador1, 10);
+    const marcador2Pronostico = parseInt(pronosticado.marcador2, 10);
     const comodin = oficial.comodin || false;
 
     const resultadoOficialEquipo1 = determinarResultado(marcador1Oficial, marcador2Oficial);
@@ -101,7 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const jugadores = await cargarJugadores();
     const resultados = await cargarResultados();
     const resultadosOficiales = await cargarResultadosOficiales();
+    const jornadaData = await cargarJornada(jornadaSeleccionada);
 
+    const partidosJornada = jornadaData.partidos || [];
     const jornadaOficial = resultadosOficiales.find(j => j.nombre === jornadaSeleccionada);
 
     if (!jornadaOficial) {
@@ -167,14 +173,48 @@ document.addEventListener('DOMContentLoaded', () => {
       y += 6;
 
       partidosPronosticados.forEach((pron, index) => {
-        const partidoOficial = buscarPartidoPorEquipos(partidosOficial, pron.equipo1, pron.equipo2);
-        const puntos = partidoOficial ? calcularPuntosPronosticados(pron, partidoOficial) : 0;
+        const partidoBase = partidosJornada[index];
+
+        if (!partidoBase) return;
+
+        const pronConEquipos = {
+          ...pron,
+          equipo1: partidoBase.equipo1,
+          equipo2: partidoBase.equipo2
+        };
+
+        const partidoOficial = buscarPartidoPorEquipos(
+          partidosOficial,
+          partidoBase.equipo1,
+          partidoBase.equipo2
+        );
+
+        let oficialParaCalculo = partidoOficial;
+
+        if (
+          partidoOficial &&
+          partidoOficial.equipo1 === partidoBase.equipo2 &&
+          partidoOficial.equipo2 === partidoBase.equipo1
+        ) {
+          oficialParaCalculo = {
+            ...partidoOficial,
+            equipo1: partidoBase.equipo1,
+            equipo2: partidoBase.equipo2,
+            marcador1: partidoOficial.marcador2,
+            marcador2: partidoOficial.marcador1
+          };
+        }
+
+        const puntos = oficialParaCalculo
+          ? calcularPuntosPronosticados(pronConEquipos, oficialParaCalculo)
+          : 0;
+
         puntosTotales += puntos;
 
-        const partidoStr = `${limpiarTexto(pron.equipo1)} vs ${limpiarTexto(pron.equipo2)}`;
+        const partidoStr = `${limpiarTexto(partidoBase.equipo1)} vs ${limpiarTexto(partidoBase.equipo2)}`;
         const pronosticoStr = `${pron.marcador1} - ${pron.marcador2}`;
-        const oficialStr = partidoOficial
-          ? `${partidoOficial.marcador1} - ${partidoOficial.marcador2}`
+        const oficialStr = oficialParaCalculo
+          ? `${oficialParaCalculo.marcador1} - ${oficialParaCalculo.marcador2}`
           : 'N/A';
 
         doc.setFont("times", "normal");

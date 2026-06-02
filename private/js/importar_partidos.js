@@ -31,6 +31,240 @@ document.addEventListener('DOMContentLoaded', () => {
             .trim();
     }
 
+
+    function traducirEquipo(nombre) {
+        const traducciones = {
+    // CONCACAF
+    "Costa Rica": "Costa Rica",
+    "Mexico": "México",
+    "Canada": "Canadá",
+    "United States": "Estados Unidos",
+    "USA": "Estados Unidos",
+    "Panama": "Panamá",
+    "Jamaica": "Jamaica",
+    "Honduras": "Honduras",
+    "El Salvador": "El Salvador",
+    "Guatemala": "Guatemala",
+    "Nicaragua": "Nicaragua",
+    "Belize": "Belice",
+    "Cuba": "Cuba",
+    "Haiti": "Haití",
+    "Trinidad & Tobago": "Trinidad y Tobago",
+    "Dominican Republic": "República Dominicana",
+    "Puerto Rico": "Puerto Rico",
+    "Curacao": "Curazao",
+    "Aruba": "Aruba",
+    "Suriname": "Surinam",
+    "Guyana": "Guyana",
+
+    // CONMEBOL
+    "Argentina": "Argentina",
+    "Brazil": "Brasil",
+    "Uruguay": "Uruguay",
+    "Paraguay": "Paraguay",
+    "Chile": "Chile",
+    "Bolivia": "Bolivia",
+    "Peru": "Perú",
+    "Colombia": "Colombia",
+    "Ecuador": "Ecuador",
+    "Venezuela": "Venezuela",
+
+    // UEFA
+    "Spain": "España",
+    "Portugal": "Portugal",
+    "France": "Francia",
+    "Germany": "Alemania",
+    "Italy": "Italia",
+    "England": "Inglaterra",
+    "Scotland": "Escocia",
+    "Wales": "Gales",
+    "Northern Ireland": "Irlanda del Norte",
+    "Ireland": "Irlanda",
+    "Netherlands": "Países Bajos",
+    "Belgium": "Bélgica",
+    "Switzerland": "Suiza",
+    "Austria": "Austria",
+    "Poland": "Polonia",
+    "Ukraine": "Ucrania",
+    "Czech Republic": "República Checa",
+    "Slovakia": "Eslovaquia",
+    "Slovenia": "Eslovenia",
+    "Croatia": "Croacia",
+    "Bosnia and Herzegovina": "Bosnia y Herzegovina",
+    "Serbia": "Serbia",
+    "Montenegro": "Montenegro",
+    "North Macedonia": "Macedonia del Norte",
+    "Albania": "Albania",
+    "Kosovo": "Kosovo",
+    "Romania": "Rumanía",
+    "Bulgaria": "Bulgaria",
+    "Hungary": "Hungría",
+    "Turkey": "Turquía",
+    "Iceland": "Islandia",
+    "Norway": "Noruega",
+    "Sweden": "Suecia",
+    "Finland": "Finlandia",
+    "Denmark": "Dinamarca",
+    "Estonia": "Estonia",
+    "Latvia": "Letonia",
+    "Lithuania": "Lituania",
+    "Luxembourg": "Luxemburgo",
+    "Georgia": "Georgia",
+    "Armenia": "Armenia",
+    "Azerbaijan": "Azerbaiyán",
+    "Belarus": "Bielorrusia",
+    "Moldova": "Moldavia",
+
+            // AFC
+            "Japan": "Japón",
+            "South Korea": "Corea del Sur",
+            "North Korea": "Corea del Norte",
+            "China": "China",
+            "Chinese Taipei": "Taipéi Chino",
+            "Hong Kong": "Hong Kong",
+            "Mongolia": "Mongolia",
+            "Australia": "Australia",
+            "New Zealand": "Nueva Zelanda",
+            "Saudi Arabia": "Arabia Saudita",
+            "Qatar": "Catar",
+            "United Arab Emirates": "Emiratos Árabes Unidos",
+            "Bahrain": "Baréin",
+            "Kuwait": "Kuwait",
+            "Oman": "Omán",
+            "Yemen": "Yemen",
+            "Jordan": "Jordania",
+            "Iraq": "Irak",
+            "Iran": "Irán",
+            "Syria": "Siria",
+            "Lebanon": "Líbano",
+            "Palestine": "Palestina",
+            "India": "India",
+            "Pakistan": "Pakistán",
+            "Bangladesh": "Bangladés",
+            "Thailand": "Tailandia",
+            "Vietnam": "Vietnam",
+            "Indonesia": "Indonesia",
+            "Malaysia": "Malasia",
+            "Singapore": "Singapur",
+            "Philippines": "Filipinas",        
+            "Uzbekistan": "Uzbekistán",
+            "Kazakhstan": "Kazajistán",
+            "Kyrgyzstan": "Kirguistán",
+            "Tajikistan": "Tayikistán",
+            "Turkmenistan": "Turkmenistán",
+            "Afghanistan": "Afganistán",
+
+            // CAF
+            "Morocco": "Marruecos",
+            "Algeria": "Argelia",
+            "Tunisia": "Túnez",
+            "Egypt": "Egipto",
+            "Libya": "Libia",
+            "Sudan": "Sudán",
+            "Nigeria": "Nigeria",
+            "Ghana": "Ghana",
+            "Cameroon": "Camerún",
+            "Senegal": "Senegal",
+            "Ivory Coast": "Costa de Marfil",
+            "Mali": "Malí",
+            "Burkina Faso": "Burkina Faso",
+            "Guinea": "Guinea",
+            "Benin": "Benín",
+            "Togo": "Togo",
+            "Uganda": "Uganda",
+            "Kenya": "Kenia",
+            "Tanzania": "Tanzania",
+            "South Africa": "Sudáfrica",
+            "Zimbabwe": "Zimbabue",
+            "Zambia": "Zambia",
+            "Mozambique": "Mozambique",
+            "Angola": "Angola",
+            "Cape Verde": "Cabo Verde",
+            "Mauritania": "Mauritania",
+
+    // OFC
+            "Fiji": "Fiyi",
+            "Samoa": "Samoa",
+            "Tahiti": "Tahití",
+            "Vanuatu": "Vanuatu",
+            "Solomon Islands": "Islas Salomón",
+            "Papua New Guinea": "Papúa Nueva Guinea",
+            "New Caledonia": "Nueva Caledonia",
+
+                    
+            "South Korea": "Corea del Sur",
+            "North Korea": "Corea del Norte",
+            "Saudi Arabia": "Arabia Saudita",
+            "Japan": "Japón",
+            "Iceland": "Islandia",
+            "Norway": "Noruega",
+            "Sweden": "Suecia",
+            "Germany": "Alemania",
+            "Finland": "Finlandia",
+            "Canada": "Canadá",
+            "Uzbekistan": "Uzbekistán",
+            "United States": "Estados Unidos",
+            "USA": "Estados Unidos",
+            "Mexico": "México",
+            "Brazil": "Brasil",
+            "Panama": "Panamá",
+            "Cape Verde": "Cabo Verde",
+            "Czech Republic": "República Checa",
+            "Switzerland": "Suiza",
+            "Ivory Coast": "Costa de Marfil",
+            "North Macedonia": "Macedonia del Norte",
+            "Bosnia and Herzegovina": "Bosnia y Herzegovina",
+            "Trinidad & Tobago": "Trinidad y Tobago",
+            "Dominican Republic": "República Dominicana",
+            "Netherlands": "Países Bajos",
+            "England": "Inglaterra",
+            "Wales": "Gales",
+            "Scotland": "Escocia",
+            "Northern Ireland": "Irlanda del Norte",
+            "Ireland": "Irlanda",
+            "Turkey": "Turquía",
+            "Morocco": "Marruecos",
+            "Egypt": "Egipto",
+            "Poland": "Polonia",
+            "Ukraine": "Ucrania",
+            "Jordan": "Jordania",
+            "Australia": "Australia",
+            "Slovakia": "Eslovaquia",
+            "Bulgaria": "Bulgaria",
+            "Montenegro": "Montenegro",
+            "Serbia": "Serbia",
+            "Kosovo": "Kosovo",
+            "Senegal": "Senegal",
+            "Nigeria": "Nigeria",
+            "Jamaica": "Jamaica",
+            "Colombia": "Colombia",
+            "Costa Rica": "Costa Rica",
+            "Ecuador": "Ecuador",
+            "Brazil": "Brasil",
+            "Saudi Arabia": "Arabia Saudita",
+            "South Korea": "Corea del Sur",
+            "Trinidad & Tobago": "Trinidad y Tobago",
+            "Switzerland": "Suiza",
+            "Cape Verde": "Cabo Verde",
+            "North Macedonia": "Macedonia del Norte",
+            "Hungary": "Hungría",
+            "Bangladesh": "Bangladés",
+            "Moldova": "Moldavia",
+            "Georgia": "Georgia",
+            "Angola": "Angola",
+            "Botswana": "Botsuana",
+            "Belarus": "Bielorrusia",
+            "Syria": "Siria",
+            "Indonesia": "Indonesia",
+            "Oman": "Omán",
+            "Bahrain": "Baréin",
+            "San Marino": "San Marino"
+        };
+
+        return traducciones[nombre] || nombre;
+    }
+
+    
     function parseFiltroTorneo(valor) {
         const filtro = {};
 
@@ -247,18 +481,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
                 <div class="match-teams">
-  <div class="team-side">
-    ${partido.logoEquipo1 ? `<img src="${partido.logoEquipo1}" class="team-logo" alt="${partido.equipo1}">` : ''}
-    <strong>${partido.equipo1}</strong>
-  </div>
+                    <div class="team-side">
+                        ${partido.logoEquipo1 ? `<img src="${partido.logoEquipo1}" class="team-logo" alt="${traducirEquipo(partido.equipo1)}">` : ''}
+                        <strong>${traducirEquipo(partido.equipo1)}</strong>
+                    </div>
 
-  <span class="vs">vs</span>
+                    <span class="vs">vs</span>
 
-  <div class="team-side">
-    ${partido.logoEquipo2 ? `<img src="${partido.logoEquipo2}" class="team-logo" alt="${partido.equipo2}">` : ''}
-    <strong>${partido.equipo2}</strong>
-  </div>
-</div>
+                  <div class="team-side">
+                    ${partido.logoEquipo2 ? `<img src="${partido.logoEquipo2}" class="team-logo" alt="${traducirEquipo(partido.equipo2)}">` : ''}
+                    <strong>${traducirEquipo(partido.equipo2)}</strong>
+                </div>
+            </div>
 
 
                 <div class="match-score">
@@ -312,19 +546,22 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             partidosPreliminares.push({
-                equipo1: partido.equipo1,
-                equipo2: partido.equipo2,
-                logoEquipo1: partido.logoEquipo1 || '',
-                logoEquipo2: partido.logoEquipo2 || '',                
-                comodin: comodinCheckbox ? comodinCheckbox.checked : false,
-                apiFixtureId: partido.apiFixtureId,
-                apiLeagueId: partido.apiLeagueId,
-                fecha: partido.fecha,
-                estado: partido.estado,
-                liga: partido.liga,
-                pais: partido.pais
-            });
+                    equipo1: traducirEquipo(partido.equipo1),
+                    equipo2: traducirEquipo(partido.equipo2),
 
+                    logoEquipo1: partido.logoEquipo1 || '',
+                    logoEquipo2: partido.logoEquipo2 || '',
+
+                    comodin: comodinCheckbox ? comodinCheckbox.checked : false,
+
+                    apiFixtureId: partido.apiFixtureId,
+                    apiLeagueId: partido.apiLeagueId,
+
+                    fecha: partido.fecha,
+                    estado: partido.estado,
+                    liga: partido.liga,
+                    pais: partido.pais
+            });            
             agregados++;
         });
 
