@@ -39,6 +39,44 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json({ limit: '10kb' }));
 
+/* ================= Auto Sync Global ================= */
+
+let ultimaSyncGlobal = 0;
+let syncEnProceso = false;
+
+app.use((req, res, next) => {
+  const ahora = Date.now();
+  const CINCO_MINUTOS = 5 * 60 * 1000;
+
+  const esArchivoEstatico =
+    req.path.startsWith('/js/') ||
+    req.path.startsWith('/css/') ||
+    req.path.includes('.png') ||
+    req.path.includes('.jpg') ||
+    req.path.includes('.jpeg') ||
+    req.path.includes('.svg') ||
+    req.path.includes('.ico');
+
+  if (esArchivoEstatico) {
+    return next();
+  }
+
+  if (!syncEnProceso && ahora - ultimaSyncGlobal > CINCO_MINUTOS) {
+    syncEnProceso = true;
+    ultimaSyncGlobal = ahora;
+
+    sincronizarTodasLasJornadasDesdeApi()
+      .catch(err => {
+        console.error('Error auto-sync:', err.message);
+      })
+      .finally(() => {
+        syncEnProceso = false;
+      });
+  }
+
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/js/:filename', (req, res) => {
@@ -576,6 +614,22 @@ async function buscarEventoPorFallback(partido) {
   }) || null;
 }
 
+
+async function sincronizarTodasLasJornadasDesdeApi() {
+  const jornadas = await Jornada.find({
+    'partidos.apiFixtureId': { $exists: true, $ne: '' }
+  });
+
+  for (const jornada of jornadas) {
+    try {
+      await axios.post(
+        `http://localhost:${PORT}/api/sync-resultados-oficiales/${encodeURIComponent(jornada.nombre)}`
+      );
+    } catch (err) {
+      console.error(`Error sincronizando ${jornada.nombre}:`, err.message);
+    }
+  }
+}
 
 app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
   try {
