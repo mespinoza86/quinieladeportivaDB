@@ -293,9 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const comodinCB = document.createElement('input');
                     comodinCB.type = 'checkbox';
+                    comodinCB.classList.add('comodin-checkbox');                    
                     comodinCB.dataset.index = index;
                     comodinCB.checked = !!partido.comodin;
-                    comodinCB.addEventListener('change', handleComodinChange);
+                    comodinCB.addEventListener('change', handleComodinChange);                    
+                    
 
                     const comodinLabel = document.createElement('label');
                     comodinLabel.textContent = partido.comodin ? 'Quitar de comodín' : 'Agregar como comodín';
@@ -367,6 +369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const eliminarCB = document.createElement('input');
                     eliminarCB.type = 'checkbox';
+                    eliminarCB.classList.add('eliminar-checkbox');                    
                     eliminarCB.dataset.index = index;
 
                     const eliminarLabel = document.createElement('label');
@@ -386,9 +389,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
     }
 
-    function handleComodinChange(event) {
-        const index = Number(event.target.dataset.index);
-        const isChecked = event.target.checked;
+    async function handleComodinChange(event) {
+        const checkbox = event.target;
+        const index = Number(checkbox.dataset.index);
+        const isChecked = checkbox.checked;
         const selectedJornada = modificarJornadaSelect.value;
 
         const message = isChecked
@@ -396,33 +400,60 @@ document.addEventListener('DOMContentLoaded', async () => {
             : '¿Está seguro que quiere cambiar este partido a que no sea comodín?';
 
         if (!confirm(message)) {
-            event.target.checked = !isChecked;
+            checkbox.checked = !isChecked;
             return;
         }
 
-        fetch(`/api/jornadas/${encodeURIComponent(selectedJornada)}`)
-            .then(response => response.json())
-            .then(data => {
-                const partidos = extraerPartidosDeDetalle(data);
-                partidos[index].comodin = isChecked;
+        checkbox.disabled = true;
 
-                return fetch('/api/jornadas', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nombre: selectedJornada,
-                        partidos,
-                        fechaCierre: jornadas.get(selectedJornada)?.fechaCierre || null
-                    })
-                });
-            })
-            .then(() => {
-                loadJornadas();
-                updateJornadaPartidos();
-                updateModificarJornadaPartidos();
-            })
-            .catch(error => console.error('Error actualizando comodín:', error));
+        try {
+            const response = await fetch(`/api/jornadas/${encodeURIComponent(selectedJornada)}`);
+            const data = await response.json();
+            const partidos = extraerPartidosDeDetalle(data);
+
+            if (!partidos[index]) {
+                alert('No se encontró el partido seleccionado.');
+                return;
+            }
+
+            partidos[index].comodin = isChecked;
+
+            const guardarResponse = await fetch('/api/jornadas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: selectedJornada,
+                    partidos,
+                    fechaCierre: data.fechaCierre || jornadas.get(selectedJornada)?.fechaCierre || null
+                })
+            });
+
+            if (!guardarResponse.ok) {
+                alert('Error actualizando comodín.');
+                checkbox.checked = !isChecked;
+                return;
+            }
+
+            jornadas.set(selectedJornada, {
+                partidos,
+                fechaCierre: data.fechaCierre || jornadas.get(selectedJornada)?.fechaCierre || null
+            });
+
+            updateJornadaPartidos();
+            updateModificarJornadaPartidos();
+
+        } catch (error) {
+            console.error('Error actualizando comodín:', error);
+            checkbox.checked = !isChecked;
+            alert('Error actualizando comodín.');
+        } finally {
+            checkbox.disabled = false;
+        }
     }
+
+
+
+
 
     actualizarFechaCierreButton.addEventListener('click', async () => {
         const selectedJornada = modificarJornadaSelect.value;
@@ -600,10 +631,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     eliminarPartidosButton.addEventListener('click', () => {
-        const selectedIndices = Array.from(
-            document.querySelectorAll('#partidosModificarList input[type="checkbox"]:checked')
-        ).map(cb => cb.dataset.index);
 
+        const selectedIndices = Array.from(            
+            document.querySelectorAll('#partidosModificarList .eliminar-checkbox:checked')
+        ).map(cb => cb.dataset.index);
+    
         if (selectedIndices.length === 0 || !jornadaActualParaModificar) return;
 
         fetch(`/api/jornadas/${encodeURIComponent(jornadaActualParaModificar)}`)

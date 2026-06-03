@@ -857,3 +857,80 @@ button + button {
   font-size: 0.8rem;
   font-weight: 700;
 }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.status-finished {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.status-scheduled {
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+}
+
+.status-live {
+  background: rgba(34, 197, 94, 0.18);
+  color: #22c55e;
+}
+
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.official-result-card {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.official-status-column {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.official-teams-column {
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .official-result-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .official-status-column {
+    justify-content: center;
+  }
+}
+
+.official-result-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.comodin-checkbox {
+    accent-color: gold;
+}
+
+.eliminar-checkbox {
+    accent-color: crimson;
+}
+

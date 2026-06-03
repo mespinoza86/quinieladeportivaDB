@@ -161,18 +161,25 @@ const ResultadoSchema = new mongoose.Schema({
   }]
 });
 
+
 const ResultadoOficialSchema = new mongoose.Schema({
   jornada: String,
-    resultados: [{
-      equipo1: String,
-      logoEquipo1: String,
-      marcador1: Number,
-      equipo2: String,
-      logoEquipo2: String,
-      marcador2: Number,
-      comodin: { type: Boolean, default: false }
+  resultados: [{
+    equipo1: String,
+    logoEquipo1: String,
+    marcador1: Number,
+    equipo2: String,
+    logoEquipo2: String,
+    marcador2: Number,
+    comodin: { type: Boolean, default: false },
+
+    estado: String,
+    minuto: Number,
+    fecha: String
   }]
 });
+
+
 
 const EquipoSchema = new mongoose.Schema({
   nombre: { type: String, required: true, unique: true }
@@ -632,6 +639,39 @@ async function sincronizarTodasLasJornadasDesdeApi() {
 }
 
 
+function obtenerMinutoPartido(fixture) {
+  const estado = String(fixture?.match_status || '');
+
+  if (fixture?.match_live === '1' && /^\d+$/.test(estado)) {
+    return Number(estado);
+  }
+
+  return null;
+}
+
+function obtenerEstadoVisual(fixture, partido) {
+  const estado = String(fixture?.match_status || partido?.apiStatus || '');
+
+  const estadosFinalizados = [
+    'Finished',
+    'After Pen.',
+    'After ET',
+    'Awarded'
+  ];
+
+  if (estadosFinalizados.includes(estado)) {
+    return 'TC';
+  }
+
+  if (fixture?.match_live === '1' && /^\d+$/.test(estado)) {
+    return 'LIVE';
+  }
+
+  return 'PROGRAMADO';
+}
+
+
+
 app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
   try {
     const { jornada } = req.params;
@@ -669,7 +709,12 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
           equipo2: partido.equipo2,
           logoEquipo2: partido.logoEquipo2 || '',
           marcador2: null,
-          comodin: partido.comodin
+          comodin: partido.comodin,
+
+          estado: 'PROGRAMADO',
+          minuto: null,
+          fecha: partido.apiDate || ''
+
         });
         continue;
       }
@@ -690,7 +735,11 @@ app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
         equipo2: partido.equipo2,
         logoEquipo2: partido.logoEquipo2 || '',
         marcador2: vieneInvertido ? marcador90.marcador1 : marcador90.marcador2,
-        comodin: partido.comodin
+        comodin: partido.comodin,
+
+        estado: obtenerEstadoVisual(fixture, partido),
+        minuto: obtenerMinutoPartido(fixture),
+        fecha: partido.apiDate || ''        
       });
     }
 
@@ -777,7 +826,12 @@ app.post('/api/resultados-oficiales', async (req, res) => {
       equipo2: r.equipo2,
       logoEquipo2: r.logoEquipo2 || partidoJornada?.logoEquipo2 || '',
       marcador2: r.marcador2,
-      comodin: r.comodin
+      comodin: r.comodin,
+
+      estado: r.estado || partidoJornada?.apiStatus || 'PROGRAMADO',
+      minuto: r.minuto ?? null,
+      fecha: r.fecha || partidoJornada?.apiDate || ''
+
     };
   });
 

@@ -1,37 +1,46 @@
-document.addEventListener("DOMContentLoaded", async function() {
+document.addEventListener("DOMContentLoaded", async function () {
     try {
-        // Cargar datos JSON de los archivos resultados.json y resultados-oficiales.json
+        const jornadaSelect = document.getElementById('jornada-select');
+        const verResultadosBtn = document.getElementById('ver-resultados-btn');
+
         const resultadosResponse = await fetch('/api/resultados');
         const resultadosData = await resultadosResponse.json();
 
         const oficialesResponse = await fetch('/api/resultados-oficiales');
         const oficialesData = await oficialesResponse.json();
 
-        // Rellenar el combobox de jornadas
-        const jornadas = [...new Set(resultadosData.map(jugador => jugador[0].split('_')[1]))]; // Extrae las jornadas únicas
-        const jornadaSelect = document.getElementById('jornada-select');
+        const jornadasResponse = await fetch('/api/jornadas');
+        const jornadasData = await jornadasResponse.json();
 
-        jornadas.forEach(jornada => {
+        jornadaSelect.innerHTML = '';
+
+        jornadasData.forEach(jornada => {
             const option = document.createElement('option');
-            option.value = jornada;
-            option.textContent = jornada;
+            option.value = jornada.nombre;
+            option.textContent = jornada.nombre;
             jornadaSelect.appendChild(option);
         });
 
-        // Manejar el evento de clic en el botón "Ver Resultados"
-        document.getElementById('ver-resultados-btn').addEventListener('click', function() {
-            const selectedJornada = jornadaSelect.value;
-            mostrarResultados(selectedJornada, resultadosData, oficialesData);
+        if (jornadasData.length > 0) {
+            const ultimaJornada = jornadasData[jornadasData.length - 1].nombre;
+            jornadaSelect.value = ultimaJornada;
+            mostrarResultados(ultimaJornada, resultadosData, oficialesData);
+        }
+
+        verResultadosBtn.addEventListener('click', function () {
+            mostrarResultados(jornadaSelect.value, resultadosData, oficialesData);
         });
 
-        // Manejar el evento de clic en el botón "Volver al Inicio" (arriba)
-        document.getElementById('volver-btn-top').addEventListener('click', function() {
-            window.location.href = '/index.html'; // Asumiendo que index.html está en el root
+        jornadaSelect.addEventListener('change', function () {
+            mostrarResultados(jornadaSelect.value, resultadosData, oficialesData);
         });
 
-        // Manejar el evento de clic en el botón "Volver al Inicio" (abajo)
-        document.getElementById('volver-btn-bottom').addEventListener('click', function() {
-            window.location.href = '/index.html'; // Asumiendo que index.html está en el root
+        document.getElementById('volver-btn-top').addEventListener('click', function () {
+            window.location.href = '/index.html';
+        });
+
+        document.getElementById('volver-btn-bottom').addEventListener('click', function () {
+            window.location.href = '/index.html';
         });
 
     } catch (error) {
@@ -40,45 +49,116 @@ document.addEventListener("DOMContentLoaded", async function() {
 });
 
 async function obtenerPartidosJornada(jornada) {
-    // Obtener los partidos de la jornada desde la API para obtener equipos y comodines
-    const response = await fetch(`/api/jornadas/${jornada}`);
+    const response = await fetch(`/api/jornadas/${encodeURIComponent(jornada)}`);
+
     if (!response.ok) {
         console.error("No se pudo obtener la información de la jornada");
-        return [];
+        return { partidos: [] };
     }
+
     return await response.json();
 }
 
+function marcador(valor) {
+    return valor !== null && valor !== undefined && valor !== '' ? valor : '-';
+}
+
+function formatearFecha(fecha) {
+    if (!fecha) return '';
+
+    const d = new Date(fecha);
+
+    if (Number.isNaN(d.getTime())) {
+        return fecha;
+    }
+
+    return d.toLocaleString('es-CR', {
+        timeZone: 'America/Costa_Rica',
+        dateStyle: 'short',
+        timeStyle: 'short'
+    });
+}
+
+function estadoPartidoHTML(partido) {
+    if (!partido) return '';
+
+    if (partido.estado === 'TC') {
+        return `<span class="status-pill status-finished">TC</span>`;
+    }
+
+    if (partido.estado === 'LIVE' && partido.minuto) {
+        return `
+            <span class="status-pill status-live">
+                <span class="live-dot"></span>
+                ${partido.minuto}'
+            </span>
+        `;
+    }
+
+    return `<span class="status-pill status-scheduled">${formatearFecha(partido.fecha)}</span>`;
+}
+
+function buscarOficialPorPartido(resultadosOficiales, partidoBase) {
+    return resultadosOficiales.find(p =>
+        (p.equipo1 === partidoBase.equipo1 && p.equipo2 === partidoBase.equipo2) ||
+        (p.equipo1 === partidoBase.equipo2 && p.equipo2 === partidoBase.equipo1)
+    );
+}
+
+function normalizarOficial(partidoOficial, partidoBase) {
+    if (!partidoOficial) return null;
+
+    const invertido =
+        partidoOficial.equipo1 === partidoBase.equipo2 &&
+        partidoOficial.equipo2 === partidoBase.equipo1;
+
+    if (!invertido) return partidoOficial;
+
+    return {
+        ...partidoOficial,
+        equipo1: partidoBase.equipo1,
+        equipo2: partidoBase.equipo2,
+        marcador1: partidoOficial.marcador2,
+        marcador2: partidoOficial.marcador1
+    };
+}
+
 function mostrarResultados(jornada, resultadosData, oficialesData) {
-    // Referencia al cuerpo de la tabla
     const tablaCuerpo = document.querySelector('#tabla-resultados tbody');
-    tablaCuerpo.innerHTML = ''; // Limpiar tabla
+    tablaCuerpo.innerHTML = '';
 
-    // Filtrar resultados por jornada
-    const resultadosJornada = resultadosData.filter(jugador => jugador[0].includes(jornada));
+    const resultadosJornada = resultadosData.filter(jugador => {
+        const partes = jugador[0].split('_');
+        return partes[1] === jornada;
+    });
 
-    // Obtener resultados oficiales para la jornada
     const resultadoOficialJornada = oficialesData.find(oficial => oficial.nombre === jornada);
     const resultadosOficiales = resultadoOficialJornada ? resultadoOficialJornada.partidos : [];
 
-    // Obtener partidos de la jornada para asociar equipos
-    obtenerPartidosJornada(jornada).then(partidos => {
-        // Crear mapa para agrupar por partido (clave "equipo1 vs equipo2")
+    obtenerPartidosJornada(jornada).then(jornadaData => {
+        const partidosJornada = jornadaData.partidos || [];
         const partidosMap = new Map();
 
         resultadosJornada.forEach(jugadorResultados => {
             const keyJugadorJornada = jugadorResultados[0];
             const nombreJugador = keyJugadorJornada.split('_')[0];
-            const pronosticos = jugadorResultados[1]; // Array de pronósticos para la jornada
+            const pronosticos = jugadorResultados[1];
 
             pronosticos.forEach((pronostico, index) => {
-                const partido = partidos.partidos[index];// Partido de la jornada correspondiente al índice
-                if (!partido) return;
+                const partidoBase = partidosJornada[index];
+                if (!partidoBase) return;
 
-                const partidoClave = `${partido.equipo1} vs ${partido.equipo2}`;
+                const partidoClave = `${partidoBase.equipo1} vs ${partidoBase.equipo2}`;
 
                 if (!partidosMap.has(partidoClave)) {
-                    partidosMap.set(partidoClave, { jugadores: [], partido });
+                    const partidoOficialRaw = buscarOficialPorPartido(resultadosOficiales, partidoBase);
+                    const partidoOficial = normalizarOficial(partidoOficialRaw, partidoBase);
+
+                    partidosMap.set(partidoClave, {
+                        jugadores: [],
+                        partido: partidoBase,
+                        oficial: partidoOficial
+                    });
                 }
 
                 partidosMap.get(partidoClave).jugadores.push({
@@ -89,33 +169,48 @@ function mostrarResultados(jornada, resultadosData, oficialesData) {
             });
         });
 
-        // Mostrar resultados en la tabla
-        partidosMap.forEach((data, partidoClave) => {
-            // Buscar resultado oficial para este partido
-            const partidoOficial = resultadosOficiales.find(p => `${p.equipo1} vs ${p.equipo2}` === partidoClave);
+        if (partidosMap.size === 0) {
+            tablaCuerpo.innerHTML = `
+                <tr>
+                    <td colspan="4">No hay resultados para esta jornada.</td>
+                </tr>
+            `;
+        }
+
+        partidosMap.forEach((data) => {
+            const partidoOficial = data.oficial;
+
             const resultadoOficialTexto = partidoOficial
-                ? `${partidoOficial.equipo1} ${partidoOficial.marcador1} - ${partidoOficial.equipo2} ${partidoOficial.marcador2}`
-                : '';
+                ? `
+                    <div class="official-result-cell">
+                        <span>
+                            ${partidoOficial.equipo1}
+                            ${marcador(partidoOficial.marcador1)}
+                            -
+                            ${marcador(partidoOficial.marcador2)}
+                            ${partidoOficial.equipo2}
+                        </span>
+                        ${estadoPartidoHTML(partidoOficial)}
+                    </div>
+                `
+                : 'N/A';
 
             data.jugadores.forEach((jugador, index) => {
                 const fila = document.createElement('tr');
 
-                // Nombre del jugador
                 const celdaJugador = document.createElement('td');
                 celdaJugador.textContent = jugador.nombreJugador;
                 fila.appendChild(celdaJugador);
 
-                // Resultado pronosticado
                 const celdaPronosticado = document.createElement('td');
-                celdaPronosticado.textContent = `${data.partido.equipo1} ${jugador.marcador1} - ${data.partido.equipo2} ${jugador.marcador2}`;
+                celdaPronosticado.textContent =
+                    `${data.partido.equipo1} ${jugador.marcador1} - ${jugador.marcador2} ${data.partido.equipo2}`;
                 fila.appendChild(celdaPronosticado);
 
-                // Resultado oficial (solo en la primera fila del partido)
                 const celdaOficial = document.createElement('td');
-                celdaOficial.textContent = (index === 0) ? resultadoOficialTexto : "";
+                celdaOficial.innerHTML = index === 0 ? resultadoOficialTexto : "";
                 fila.appendChild(celdaOficial);
 
-                // Puntos obtenidos
                 const celdaPuntos = document.createElement('td');
                 const puntosObtenidos = calcularPuntos(
                     { marcador1: jugador.marcador1, marcador2: jugador.marcador2 },
@@ -128,7 +223,6 @@ function mostrarResultados(jornada, resultadosData, oficialesData) {
             });
         });
 
-        // Mostrar botones "Volver al Inicio"
         document.getElementById('volver-btn-bottom').style.display = 'block';
         document.getElementById('volver-btn-top').style.display = 'block';
     });
@@ -146,22 +240,33 @@ function calcularPuntos(pronostico, partidoOficial) {
     const esComodin = partidoOficial.comodin || false;
 
     if (
-        !isNaN(marcador1Pronosticado) && !isNaN(marcador2Pronosticado) &&
-        !isNaN(marcador1Oficial) && !isNaN(marcador2Oficial)
+        !isNaN(marcador1Pronosticado) &&
+        !isNaN(marcador2Pronosticado) &&
+        !isNaN(marcador1Oficial) &&
+        !isNaN(marcador2Oficial)
     ) {
-        if (marcador1Pronosticado === marcador1Oficial && marcador2Pronosticado === marcador2Oficial) {
-            puntos += 5;
-            if (esComodin) puntos += 2;
+        if (
+            marcador1Pronosticado === marcador1Oficial &&
+            marcador2Pronosticado === marcador2Oficial
+        ) {
+            puntos += esComodin ? 7 : 5;
         } else {
-            // Resultado ganador, empate o perdido coincide
-            const resultadoPronosticado = marcador1Pronosticado === marcador2Pronosticado ? 'empate' :
-                (marcador1Pronosticado > marcador2Pronosticado ? 'gana1' : 'gana2');
-            const resultadoOficial = marcador1Oficial === marcador2Oficial ? 'empate' :
-                (marcador1Oficial > marcador2Oficial ? 'gana1' : 'gana2');
+            const resultadoPronosticado =
+                marcador1Pronosticado === marcador2Pronosticado
+                    ? 'empate'
+                    : marcador1Pronosticado > marcador2Pronosticado
+                        ? 'gana1'
+                        : 'gana2';
+
+            const resultadoOficial =
+                marcador1Oficial === marcador2Oficial
+                    ? 'empate'
+                    : marcador1Oficial > marcador2Oficial
+                        ? 'gana1'
+                        : 'gana2';
 
             if (resultadoPronosticado === resultadoOficial) {
-                puntos += 3;
-                if (esComodin) puntos += 1;
+                puntos += esComodin ? 4 : 3;
             }
         }
     }
