@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         const jornadaSelect = document.getElementById('jornada-select');
         const verResultadosBtn = document.getElementById('ver-resultados-btn');
+        const tablaCuerpo = document.querySelector('#tabla-resultados tbody');
 
         const resultadosResponse = await fetch('/api/resultados');
         const resultadosData = await resultadosResponse.json();
@@ -12,28 +13,52 @@ document.addEventListener("DOMContentLoaded", async function () {
         const jornadasResponse = await fetch('/api/jornadas');
         const jornadasData = await jornadasResponse.json();
 
+        function jornadaEstaCerrada(jornada) {
+            if (!jornada.fechaCierre) return true;
+            return new Date(jornada.fechaCierre) <= new Date();
+        }
+
+        function mostrarMensaje(mensaje) {
+            tablaCuerpo.innerHTML = `
+                <tr>
+                    <td colspan="4">${mensaje}</td>
+                </tr>
+            `;
+        }
+
         jornadaSelect.innerHTML = '';
 
         jornadasData.forEach(jornada => {
             const option = document.createElement('option');
             option.value = jornada.nombre;
             option.textContent = jornada.nombre;
+            option.dataset.cerrada = jornadaEstaCerrada(jornada) ? 'true' : 'false';
             jornadaSelect.appendChild(option);
         });
 
-        if (jornadasData.length > 0) {
-            const ultimaJornada = jornadasData[jornadasData.length - 1].nombre;
-            jornadaSelect.value = ultimaJornada;
-            mostrarResultados(ultimaJornada, resultadosData, oficialesData);
+        const jornadasCerradas = jornadasData.filter(jornadaEstaCerrada);
+
+        if (jornadasCerradas.length > 0) {
+            const ultimaJornadaCerrada = jornadasCerradas[jornadasCerradas.length - 1].nombre;
+            jornadaSelect.value = ultimaJornadaCerrada;
+            mostrarResultados(ultimaJornadaCerrada, resultadosData, oficialesData);
+        } else {
+            mostrarMensaje('No hay jornadas cerradas todavía. No puedes ver resultados aún.');
         }
 
-        verResultadosBtn.addEventListener('click', function () {
-            mostrarResultados(jornadaSelect.value, resultadosData, oficialesData);
-        });
+        function intentarMostrarJornadaSeleccionada() {
+            const selectedOption = jornadaSelect.options[jornadaSelect.selectedIndex];
 
-        jornadaSelect.addEventListener('change', function () {
+            if (!selectedOption || selectedOption.dataset.cerrada !== 'true') {
+                mostrarMensaje('La jornada aún no ha cerrado, por lo tanto no puedes ver estos resultados aún.');
+                return;
+            }
+
             mostrarResultados(jornadaSelect.value, resultadosData, oficialesData);
-        });
+        }
+
+        verResultadosBtn.addEventListener('click', intentarMostrarJornadaSeleccionada);
+        jornadaSelect.addEventListener('change', intentarMostrarJornadaSeleccionada);
 
         document.getElementById('volver-btn-top').addEventListener('click', function () {
             window.location.href = '/index.html';
