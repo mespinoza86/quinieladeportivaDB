@@ -1059,4 +1059,31 @@ button + button {
     justify-content: center;
   }
 }
+.home-rotator {
+  width: 100%;
+  margin: 16px 0 24px;
+}
+
+.rotator-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.rotator-panel.active {
+  display: block;
+  animation: fadeSlideIn 650ms ease forwards;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 

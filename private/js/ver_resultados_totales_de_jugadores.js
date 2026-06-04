@@ -111,17 +111,23 @@ function estadoPartidoHTML(partido) {
         return `<span class="status-pill status-finished">TC</span>`;
     }
 
+    if (partido.estado === 'MT') {
+        return `<span class="status-pill status-live">
+            <span class="live-dot"></span>
+            MT
+        </span>`;
+    }
+
     if (partido.estado === 'LIVE' && partido.minuto) {
-        return `
-            <span class="status-pill status-live">
-                <span class="live-dot"></span>
-                ${partido.minuto}'
-            </span>
-        `;
+        return `<span class="status-pill status-live">
+            <span class="live-dot"></span>
+            ${partido.minuto}${String(partido.minuto).includes('+') ? '' : "'"}
+        </span>`;
     }
 
     return `<span class="status-pill status-scheduled">${formatearFecha(partido.fecha)}</span>`;
 }
+
 
 function buscarOficialPorPartido(resultadosOficiales, partidoBase) {
     return resultadosOficiales.find(p =>

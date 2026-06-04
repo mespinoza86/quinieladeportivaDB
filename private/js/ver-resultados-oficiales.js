@@ -30,22 +30,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function estadoPartidoHTML(partido) {
-        if (partido.estado === 'TC') {
-            return `<span class="status-pill status-finished">TC</span>`;
-        }
+function estadoPartidoHTML(partido) {
+    if (!partido) return '';
 
-        if (partido.estado === 'LIVE' && partido.minuto) {
-            return `
-                <span class="status-pill status-live">
-                    <span class="live-dot"></span>
-                    ${partido.minuto}'
-                </span>
-            `;
-        }
-
-        return `<span class="status-pill status-scheduled">${formatearFecha(partido.fecha)}</span>`;
+    if (partido.estado === 'TC') {
+        return `<span class="status-pill status-finished">TC</span>`;
     }
+
+    if (partido.estado === 'MT') {
+        return `<span class="status-pill status-live">
+            <span class="live-dot"></span>
+            MT
+        </span>`;
+    }
+
+    if (partido.estado === 'LIVE' && partido.minuto) {
+        return `<span class="status-pill status-live">
+            <span class="live-dot"></span>
+            ${partido.minuto}${String(partido.minuto).includes('+') ? '' : "'"}
+        </span>`;
+    }
+
+    return `<span class="status-pill status-scheduled">${formatearFecha(partido.fecha)}</span>`;
+}
+
 
     function renderizarResultados(jornada) {
         const resultados = resultadosOficialesCache.find(r => r.nombre === jornada);
