@@ -15,6 +15,8 @@ const SALT_ROUNDS = 10;
 
 /* ================= Middleware ================= */
 
+/* ================= Middleware ================= */
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || origin === 'null') return callback(null, true);
@@ -38,6 +40,43 @@ app.use(cors({
 
 app.use(express.json());
 app.use(bodyParser.json({ limit: '10kb' }));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'quiniela_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  }
+}));
+
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.authenticated === true) {
+    return next();
+  }
+
+  return res.redirect('/login.html');
+}
+
+const paginasAdmin = [
+  '/jugadores.html',
+  '/jornadas.html',
+  '/importar_partidos.html',
+  '/resultados.html',
+  '/agregar-resultados-oficiales.html',
+  '/generar_reporte.html',
+  '/enviarresultados.html',
+  '/copiarresultadojugador.html'
+];
+
+app.use((req, res, next) => {
+  if (paginasAdmin.includes(req.path)) {
+    return requireAdmin(req, res, next);
+  }
+
+  next();
+});
 
 /* ================= Auto Sync Global ================= */
 
@@ -77,6 +116,27 @@ app.use((req, res, next) => {
   next();
 });
 
+/* ================= Auth ================= */
+
+app.post('/login', (req, res) => {
+  if (req.body.password === process.env.ADMIN_PASSWORD) {
+    req.session.authenticated = true;
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Contraseña incorrecta' });
+  }
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => res.json({ success: true }));
+});
+
+app.get('/check-auth', (req, res) => {
+  res.json({ authenticated: req.session.authenticated || false });
+});
+
+/* ================= Static Files ================= */
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/js/:filename', (req, res) => {
@@ -91,15 +151,9 @@ app.get('/css/:filename', (req, res) => {
   res.status(404).send('Archivo CSS no encontrado');
 });
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'quiniela_secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  }
-}));
+
+
+
 
 /* ================= MongoDB ================= */
 
@@ -191,25 +245,6 @@ const Jornada = mongoose.model('Jornada', JornadaSchema);
 const Resultado = mongoose.model('Resultado', ResultadoSchema);
 const ResultadoOficial = mongoose.model('ResultadoOficial', ResultadoOficialSchema);
 
-/* ================= Auth ================= */
-
-app.post('/login', (req, res) => {
-  if (req.body.password === process.env.ADMIN_PASSWORD) {
-    req.session.authenticated = true;
-    res.json({ success: true });
-  } else {
-    res.status(401).json({ error: 'Contraseña incorrecta' });
-  }
-});
-
-app.post('/logout', (req, res) => {
-  req.session.destroy(() => res.json({ success: true }));
-});
-
-app.get('/check-auth', (req, res) => {
-  res.json({ authenticated: req.session.authenticated || false });
-});
-
 /* ================= HTML Routes ================= */
 
 [
@@ -250,7 +285,7 @@ app.get('/api/jugadores', async (req, res) => {
   res.json(jugadores.map(j => j.nombre));
 });
 
-app.post('/api/jugadores', async (req, res) => {
+app.post('/api/jugadores', requireAdmin, async (req, res) => {
   const { nombre, password } = req.body;
 
   if (!nombre || !password) {
@@ -268,7 +303,7 @@ app.post('/api/jugadores', async (req, res) => {
   res.json(jugadores.map(j => ({ nombre: j.nombre })));
 });
 
-app.delete('/api/jugadores/:nombre', async (req, res) => {
+app.delete('/api/jugadores/:nombre', requireAdmin, async (req, res) => {
   try {
     await Jugador.deleteOne({ nombre: req.params.nombre });
     res.json({ message: 'Jugador eliminado correctamente' });
@@ -343,7 +378,7 @@ app.get('/api/jornadas/:nombre', async (req, res) => {
   });
 });
 
-app.post('/api/jornadas', async (req, res) => {
+app.post('/api/jornadas', requireAdmin, async (req, res) => {
   const { nombre, partidos, fechaCierre } = req.body;
 
   await Jornada.findOneAndUpdate(
@@ -360,7 +395,7 @@ app.post('/api/jornadas', async (req, res) => {
   res.json(jornadas.map(j => [j.nombre, j.partidos]));
 });
 
-app.post('/api/jornadas/importar-api', async (req, res) => {
+app.post('/api/jornadas/importar-api', requireAdmin, async (req, res) => {
   try {
     const { nombre, fechaCierre, partidos } = req.body;
 
@@ -402,7 +437,7 @@ app.post('/api/jornadas/importar-api', async (req, res) => {
   }
 });
 
-app.post('/api/jornadas/agregar-partido', async (req, res) => {
+app.post('/api/jornadas/agregar-partido', requireAdmin, async (req, res) => {
   const { jornada, partido } = req.body;
   const doc = await Jornada.findOne({ nombre: jornada });
 
@@ -414,7 +449,7 @@ app.post('/api/jornadas/agregar-partido', async (req, res) => {
   res.json({ success: true });
 });
 
-app.post('/api/jornadas/eliminar-partidos', async (req, res) => {
+app.post('/api/jornadas/eliminar-partidos',requireAdmin, async (req, res) => {
   const { jornada, indices } = req.body;
   const doc = await Jornada.findOne({ nombre: jornada });
 
@@ -426,7 +461,7 @@ app.post('/api/jornadas/eliminar-partidos', async (req, res) => {
   res.json({ success: true });
 });
 
-app.post('/api/jornadas/comodin', async (req, res) => {
+app.post('/api/jornadas/comodin',requireAdmin, async (req, res) => {
   const { jornada, partidos } = req.body;
   const doc = await Jornada.findOne({ nombre: jornada });
 
@@ -748,7 +783,7 @@ function obtenerEstadoPartido(fixture, partido) {
 }
 
 
-app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
+app.post('/api/sync-resultados-oficiales/:jornada', requireAdmin, async (req, res) => {
   try {
     const { jornada } = req.params;
 
@@ -887,7 +922,7 @@ app.get('/api/resultados-oficiales', async (req, res) => {
   res.json(resultados);
 });
 
-app.post('/api/resultados-oficiales', async (req, res) => {
+app.post('/api/resultados-oficiales', requireAdmin, async (req, res) => {
   const { jornada, resultados } = req.body;
 
   const jornadaDoc = await Jornada.findOne({ nombre: jornada });
@@ -1086,7 +1121,7 @@ app.post('/api/resultados-seguros/:jugador/:jornada', async (req, res) => {
 });
 
 /* ================= API: Resultados Totales ================= */
-app.delete('/api/jornadas/:nombre', async (req, res) => {
+app.delete('/api/jornadas/:nombre', requireAdmin, async (req, res) => {
   try {
     const nombreJornada = req.params.nombre;
 
