@@ -85,7 +85,7 @@ let syncEnProceso = false;
 
 app.use((req, res, next) => {
   const ahora = Date.now();
-  const CINCO_MINUTOS = 5 * 60 * 1000;
+  const CINCO_MINUTOS = 1 * 60 * 1000;
 
   const esArchivoEstatico =
     req.path.startsWith('/js/') ||
