@@ -783,7 +783,7 @@ function obtenerEstadoPartido(fixture, partido) {
 }
 
 
-app.post('/api/sync-resultados-oficiales/:jornada', requireAdmin, async (req, res) => {
+app.post('/api/sync-resultados-oficiales/:jornada', async (req, res) => {
   try {
     const { jornada } = req.params;
 
