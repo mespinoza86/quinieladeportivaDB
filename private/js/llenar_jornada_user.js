@@ -110,7 +110,12 @@ function mostrarPartidos(partidos, fechaCierre) {
     partidos.forEach((partido, i) => {
         const partidoDiv = document.createElement('div');
 
-        partidoDiv.classList.add('partido-container');
+        partidoDiv.classList.add('partido-container');        
+
+        if (partido.comodin) {
+            partidoDiv.classList.add('partido-comodin');
+        }
+
         partidoDiv.dataset.equipo1 = partido.equipo1 || '';
         partidoDiv.dataset.equipo2 = partido.equipo2 || '';
         partidoDiv.dataset.comodin = partido.comodin ? 'true' : 'false';
@@ -122,6 +127,7 @@ function mostrarPartidos(partidos, fechaCierre) {
 
         partidoDiv.innerHTML = `
             <div class="match-teams">
+                ${partido.comodin ? '<div class="comodin-badge">⭐ COMODÍN</div>' : ''}
 
                 <div class="team-side">
                     ${logoHTML(partido.logoEquipo1, partido.equipo1)}
@@ -370,6 +376,5 @@ async function guardarResultados(jornada, fechaCierre) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jugador, jornada, pronosticos })
     });
-
     alert("Recuerda enviar un mensaje en el grupo escribiendo que sus resultados ya fueron guardados.\n Revise en Resultados Pronosticados por Jugador que sus resultados son los correctos.\n Resultados guardados correctamente");
 }
