@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tabla por Jornada</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/js/tabla-jornada.js" defer></script>
+</head>
+
+<body class="app-body">
+  <main class="mobile-shell wide-shell">
+    <section class="hero-card">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Premio de jornada</p>
+          <h1>Tabla por Jornada</h1>
+        </div>
+        <div class="app-logo">🏅</div>
+      </div>
+      <p class="hero-text">Consulta la clasificación y las personas ganadoras de cada jornada.</p>
+    </section>
+
+    <section class="app-panel">
+      <label for="jornadaSelect" class="field-label">Seleccionar jornada</label>
+      <select id="jornadaSelect">
+        <option value="">Cargando jornadas...</option>
+      </select>
+
+      <div id="estadoJornada" class="jornada-status" aria-live="polite"></div>
+      <div id="ganadoresJornada" class="jornada-winners" aria-live="polite"></div>
+
+      <div class="table-scroll">
+        <table id="tablaJornada" class="jornada-table">
+          <thead>
+            <tr>
+              <th>Posición</th>
+              <th>Jugador</th>
+              <th>Puntos</th>
+              <th>Exactos</th>
+              <th>Aciertos</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <p id="mensajeTabla" class="helper-text" aria-live="polite"></p>
+      <button onclick="window.location.href='index.html'" class="ghost-button" type="button">Volver</button>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html">🏠<span>Inicio</span></a>
+    <a href="ver_jornadas.html">📅<span>Jornadas</span></a>
+    <a href="tabla-jornada.html" class="active">🏅<span>Por jornada</span></a>
+    <a href="resultados-totales.html">🏆<span>General</span></a>
+  </nav>
+</body>
+</html>

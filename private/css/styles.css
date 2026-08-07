@@ -1223,34 +1223,69 @@ button + button {
 
 /**//**//**/
 
- .table-scroll {
+.table-scroll {
   width: 100%;
   overflow-x: auto;
 }
 
-.campeon-table {
-  min-width: 100%;
-  table-layout: fixed;
+.jornada-status {
+  margin-top: 18px;
 }
 
-.campeon-table th,
-.campeon-table td {
-  white-space: normal;
-  word-break: break-word;
+.jornada-status > div {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 700;
 }
 
-.campeon-table th:first-child,
-.campeon-table td:first-child {
-  width: 35%;
+.status-complete {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
 }
 
-.campeon-table th:last-child,
-.campeon-table td:last-child {
-  width: 65%;
+.status-pending {
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
 }
 
-.campeon-table td {
-  font-size: 14px;
+.jornada-winners {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fef3c7, #fff7ed);
+  color: #78350f;
+}
+
+.jornada-winners:empty {
+  display: none;
+}
+
+.jornada-winners strong {
+  font-size: 18px;
+}
+
+.jornada-table {
+  min-width: 620px;
+}
+
+.jornada-table th,
+.jornada-table td {
+  text-align: center;
+}
+
+.jornada-table th:nth-child(2),
+.jornada-table td:nth-child(2) {
+  text-align: left;
+}
+
+.jornada-winner-row {
+  background: #fef9c3;
+  font-weight: 700;
 }
 
 .partido-comodin {

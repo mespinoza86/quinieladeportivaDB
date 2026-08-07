@@ -16,20 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Obtener las jornadas de los resultados
                 const ejemploJugador = Object.keys(resultados)[0]; // Tomamos el primer jugador como referencia
 
-                // to restore after the final
-                //const jornadas = Object.keys(resultados[ejemploJugador]).filter(key => key !== 'total');
-                          // hasta aqui
-                          
-                // to remove after the final 
-                let jornadas = Object.keys(resultados[ejemploJugador]).filter(key => key !== 'total');
-
-                if (jornadas.includes('Campeón Mundial')) {
-                    jornadas = [
-                        'Campeón Mundial',
-                        ...jornadas.filter(jornada => jornada !== 'Campeón Mundial')
-                    ];
-                }
-                /// hasta aqui
+                const jornadas = Object.keys(resultados[ejemploJugador]).filter(key => key !== 'total');
 
                 // Crear encabezados dinámicamente
                 jornadas.forEach(jornadaId => {

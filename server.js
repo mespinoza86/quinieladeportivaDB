@@ -67,8 +67,7 @@ const paginasAdmin = [
   '/agregar-resultados-oficiales.html',
   '/generar_reporte.html',
   '/enviarresultados.html',
-  '/copiarresultadojugador.html',
-  '/campeon-oficial.html'
+  '/copiarresultadojugador.html'
 ];
 
 app.use((req, res, next) => {
@@ -247,20 +246,6 @@ const Resultado = mongoose.model('Resultado', ResultadoSchema);
 const ResultadoOficial = mongoose.model('ResultadoOficial', ResultadoOficialSchema);
 
 
-const PronosticoCampeonSchema = new mongoose.Schema({
-  jugador: { type: String, required: true, unique: true },
-  campeon: { type: String, required: true },
-  fechaRegistro: { type: Date, default: Date.now }
-});
-
-const CampeonOficialSchema = new mongoose.Schema({
-  campeon: { type: String, required: true },
-  puntos: { type: Number, default: 20 }
-});
-
-const PronosticoCampeon = mongoose.model('PronosticoCampeon', PronosticoCampeonSchema);
-const CampeonOficial = mongoose.model('CampeonOficial', CampeonOficialSchema);
-
 /* ================= HTML Routes ================= */
 
 [
@@ -277,11 +262,10 @@ const CampeonOficial = mongoose.model('CampeonOficial', CampeonOficialSchema);
   '/generar_reporte',
   '/llenar_jornada',
   '/resultados-totales',
+  '/tabla-jornada',
   '/ver-resultados-oficiales',
   '/verResultados',
   '/verResultados_puntos',
-  '/campeon-oficial',
-  '/pronostico-campeon',
   '/importar_partidos'
 ].forEach(route => {
   app.get(route, (req, res) => {
@@ -1165,185 +1149,138 @@ app.delete('/api/jornadas/:nombre', requireAdmin, async (req, res) => {
   }
 });
 
-const EQUIPOS_MUNDIAL_2026 = [
-  'México',
-  'Sudáfrica',
-  'República de Corea',
-  'Chequia',
-  'Canadá',
-  'Bosnia y Herzegovina',
-  'Catar',
-  'Suiza',
-  'Brasil',
-  'Marruecos',
-  'Haití',
-  'Escocia',
-  'EE. UU.',
-  'Paraguay',
-  'Australia',
-  'Turquía',
-  'Alemania',
-  'Curazao',
-  'Costa de Marfil',
-  'Ecuador',
-  'Países Bajos',
-  'Japón',
-  'Suecia',
-  'Túnez',
-  'Bélgica',
-  'Egipto',
-  'RI de Irán',
-  'Nueva Zelanda',
-  'España',
-  'Islas de Cabo Verde',
-  'Arabia Saudí',
-  'Uruguay',
-  'Francia',
-  'Senegal',
-  'Irak',
-  'Noruega',
-  'Argentina',
-  'Argelia',
-  'Austria',
-  'Jordania',
-  'Portugal',
-  'RD Congo',
-  'Uzbekistán',
-  'Colombia',
-  'Inglaterra',
-  'Croacia',
-  'Ghana',
-  'Panamá'
-];
-
-
-
-app.get('/api/equipos-mundial', (req, res) => {
-  res.json(EQUIPOS_MUNDIAL_2026.sort());
-});
-
-app.get('/api/pronostico-campeon/:jugador', async (req, res) => {
-  const doc = await PronosticoCampeon.findOne({ jugador: req.params.jugador });
-  res.json(doc || null);
-});
-
-
-app.post('/api/pronostico-campeon', async (req, res) => {
+app.get('/api/tabla-jornada/:jornada', async (req, res) => {
   try {
-    const { jugador, password, campeon } = req.body;
+    const nombreJornada = req.params.jornada;
+    const jornada = await Jornada.findOne({ nombre: nombreJornada });
 
-    if (!jugador || !password || !campeon) {
-      return res.status(400).json({ error: 'Jugador, contraseña y campeón son obligatorios' });
+    if (!jornada) {
+      return res.status(404).json({ error: 'Jornada no encontrada' });
     }
 
-    const jornada1 = await Jornada.findOne({ nombre: 'Jornada1' });
+    const [jugadores, resultados, oficial] = await Promise.all([
+      Jugador.find({}).sort({ nombre: 1 }),
+      Resultado.find({ jornada: nombreJornada }),
+      ResultadoOficial.findOne({ jornada: nombreJornada })
+    ]);
 
-    if (jornada1 && jornada1.fechaCierre) {
-      const ahora = new Date();
-      const fechaCierre = new Date(jornada1.fechaCierre);
+    const resultadosOficiales = oficial?.resultados || [];
+    const esMarcadorValido = marcador =>
+      typeof marcador === 'number' && Number.isFinite(marcador);
 
-      if (ahora > fechaCierre) {
-        return res.status(403).json({
-          error: 'El pronóstico del campeón mundial ya está cerrado porque la Jornada1 ya cerró.'
-        });
+    const partidosConResultado = jornada.partidos.reduce((total, partido, index) => {
+      const resultadoOficial = resultadosOficiales[index];
+      return total + (
+        resultadoOficial &&
+        esMarcadorValido(resultadoOficial.marcador1) &&
+        esMarcadorValido(resultadoOficial.marcador2)
+          ? 1
+          : 0
+      );
+    }, 0);
+
+    const finalizada = jornada.partidos.length > 0 &&
+      partidosConResultado === jornada.partidos.length;
+
+    const pronosticosPorJugador = new Map(
+      resultados.map(resultado => [resultado.jugador, resultado.pronosticos])
+    );
+
+    const resultadoPartido = (marcador1, marcador2) => {
+      if (marcador1 > marcador2) return 1;
+      if (marcador1 < marcador2) return -1;
+      return 0;
+    };
+
+    const clasificacion = jugadores.map(jugador => {
+      const pronosticos = pronosticosPorJugador.get(jugador.nombre) || [];
+      let puntos = 0;
+      let exactos = 0;
+      let aciertos = 0;
+
+      jornada.partidos.forEach((partido, index) => {
+        const pronostico = pronosticos[index];
+        const resultadoOficial = resultadosOficiales[index];
+
+        if (!pronostico || !resultadoOficial) return;
+
+        const marcadores = [
+          pronostico.marcador1,
+          pronostico.marcador2,
+          resultadoOficial.marcador1,
+          resultadoOficial.marcador2
+        ];
+
+        if (!marcadores.every(esMarcadorValido)) return;
+
+        const esExacto =
+          pronostico.marcador1 === resultadoOficial.marcador1 &&
+          pronostico.marcador2 === resultadoOficial.marcador2;
+        const acertoResultado =
+          resultadoPartido(pronostico.marcador1, pronostico.marcador2) ===
+          resultadoPartido(resultadoOficial.marcador1, resultadoOficial.marcador2);
+        const esComodin = Boolean(resultadoOficial.comodin);
+
+        if (esExacto) {
+          puntos += esComodin ? 7 : 5;
+          exactos += 1;
+          aciertos += 1;
+        } else if (acertoResultado) {
+          puntos += esComodin ? 4 : 3;
+          aciertos += 1;
+        }
+      });
+
+      return {
+        jugador: jugador.nombre,
+        puntos,
+        exactos,
+        aciertos,
+        participo: pronosticos.length > 0
+      };
+    }).filter(fila => fila.participo);
+
+    clasificacion.sort((a, b) =>
+      b.puntos - a.puntos || a.jugador.localeCompare(b.jugador, 'es')
+    );
+
+    let posicionAnterior = 0;
+    let puntosAnteriores = null;
+
+    clasificacion.forEach((fila, index) => {
+      if (puntosAnteriores === null || fila.puntos !== puntosAnteriores) {
+        posicionAnterior = index + 1;
+        puntosAnteriores = fila.puntos;
       }
-    }
 
-    const jugadorEncontrado = await Jugador.findOne({ nombre: jugador });
-
-    if (!jugadorEncontrado) {
-      return res.status(404).json({ error: 'Jugador no encontrado' });
-    }
-
-    const passwordCorrecto = await bcrypt.compare(
-      String(password).trim(),
-      String(jugadorEncontrado.password || '').trim()
-    );
-
-    if (!passwordCorrecto) {
-      return res.status(401).json({ error: 'Contraseña incorrecta' });
-    }
-
-    await PronosticoCampeon.findOneAndUpdate(
-      { jugador },
-      { jugador, campeon, fechaRegistro: new Date() },
-      { upsert: true, new: true }
-    );
-
-    res.json({ success: true, message: 'Campeón guardado correctamente' });
-
-  } catch (error) {
-    console.error('Error guardando campeón:', error);
-    res.status(500).json({ error: 'Error interno guardando campeón' });
-  }
-});
-
-
-app.get('/api/pronosticos-campeon-publicos', async (req, res) => {
-  try {
-    const jugadores = await Jugador.find({}).sort({ nombre: 1 });
-    const pronosticos = await PronosticoCampeon.find({});
-
-    const mapaPronosticos = new Map();
-
-    pronosticos.forEach(p => {
-      mapaPronosticos.set(p.jugador, p.campeon);
+      fila.posicion = posicionAnterior;
+      fila.ganador = finalizada && posicionAnterior === 1;
+      delete fila.participo;
     });
 
-    const resultado = jugadores.map(j => ({
-      jugador: j.nombre,
-      campeon: mapaPronosticos.get(j.nombre) || null
-    }));
+    const ganadores = finalizada
+      ? clasificacion.filter(fila => fila.ganador).map(fila => fila.jugador)
+      : [];
 
-    res.json(resultado);
-
+    res.json({
+      jornada: jornada.nombre,
+      finalizada,
+      partidosTotales: jornada.partidos.length,
+      partidosConResultado,
+      ganadores,
+      clasificacion
+    });
   } catch (error) {
-    console.error('Error obteniendo pronósticos públicos de campeón:', error);
-    res.status(500).json({ error: 'Error obteniendo pronósticos de campeón' });
+    console.error('Error generando tabla por jornada:', error);
+    res.status(500).json({ error: 'Error generando tabla por jornada' });
   }
 });
-
-
-app.get('/api/pronosticos-campeon', requireAdmin, async (req, res) => {
-  const docs = await PronosticoCampeon.find({}).sort({ jugador: 1 });
-  res.json(docs);
-});
-
-app.get('/api/campeon-oficial', async (req, res) => {
-  const doc = await CampeonOficial.findOne({});
-  res.json(doc || null);
-});
-
-app.post('/api/campeon-oficial', requireAdmin, async (req, res) => {
-  const { campeon } = req.body;
-
-  if (!campeon) {
-    return res.status(400).json({ error: 'Debe seleccionar el campeón oficial' });
-  }
-
-  await CampeonOficial.findOneAndUpdate(
-    {},
-    { campeon, puntos: 20 },
-    { upsert: true, new: true }
-  );
-
-  res.json({ success: true, message: 'Campeón oficial guardado correctamente' });
-});
-
 
 app.get('/api/resultados-totales', async (req, res) => {
   const jugadores = await Jugador.find({});
   const jornadas = await Jornada.find({});
   const resultados = await Resultado.find({});
   const oficiales = await ResultadoOficial.find({});
-  const pronosticosCampeon = await PronosticoCampeon.find({});
-  const campeonOficial = await CampeonOficial.findOne({});
-  const mapCampeon = new Map();
-
-  pronosticosCampeon.forEach(p => {
-    mapCampeon.set(p.jugador, p.campeon);
-  });
-
   const mapRes = new Map();
   resultados.forEach(r => mapRes.set(`${r.jugador}_${r.jornada}`, r.pronosticos));
 
@@ -1399,23 +1336,6 @@ app.get('/api/resultados-totales', async (req, res) => {
       resultadosTotales[j.nombre][jornada.nombre] = puntosJornada;
       totalPuntos += puntosJornada;
     }
-
-    let puntosCampeon = 0;
-
-    const campeonJugador = mapCampeon.get(j.nombre);
-
-    if (
-        campeonOficial &&
-        campeonJugador &&
-        String(campeonJugador).trim().toLowerCase() ===
-        String(campeonOficial.campeon).trim().toLowerCase()
-      ) {
-      puntosCampeon = campeonOficial.puntos || 20;
-    }
-
-    resultadosTotales[j.nombre]['Campeón Mundial'] = puntosCampeon;
-    totalPuntos += puntosCampeon;
-
 
     resultadosTotales[j.nombre].total = totalPuntos;
   }
