@@ -1285,7 +1285,12 @@ button + button {
 
 .jornada-winner-row {
   background: #fef9c3;
+  color: #422006;
   font-weight: 700;
+}
+
+.jornada-winner-row td {
+  color: #422006;
 }
 
 .partido-comodin {

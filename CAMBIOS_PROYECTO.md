@@ -73,3 +73,42 @@ Mostrar la clasificación independiente de cada jornada para identificar a la pe
 - Los 24 archivos JavaScript pasaron la validación de sintaxis de Node.
 - La API se probó con datos reales de `Jornada1`.
 - Con 0 de 10 resultados oficiales, la jornada se identificó como pendiente y no declaró ganadores.
+
+## 2026-08-11 — Revisión de continuidad del proyecto
+
+### Objetivo
+
+Revisar el historial del proyecto, confirmar el punto exacto en que quedó el desarrollo y definir las siguientes prioridades antes de realizar nuevos cambios.
+
+### Estado confirmado
+
+- El último trabajo terminado fue la eliminación del módulo de campeón mundial y la creación de la tabla de posiciones independiente por jornada.
+- La rama `main` está sincronizada con `origin/main` en el commit `33669ae` (`fixing issues and tabla por jornada`).
+- Antes de actualizar esta bitácora, el árbol de trabajo no tenía cambios pendientes.
+- El proyecto no cuenta actualmente con una suite de pruebas automatizadas; `package.json` sólo incluye el comando de inicio del servidor.
+- El archivo `README.md` contiene únicamente el nombre del proyecto y todavía no documenta instalación, configuración, operación ni despliegue.
+- Se confirmó que `.env` está versionado en Git. No se copiaron ni expusieron sus valores en esta bitácora.
+- Se detectaron rutas que modifican información sin exigir sesión administrativa, entre ellas la sincronización de resultados, el guardado general de pronósticos y la actualización de equipos. Esto requiere una revisión de permisos antes de considerarlo listo para producción.
+- La sesión administrativa utiliza un secreto predeterminado si falta `SESSION_SECRET`; conviene impedir el arranque en producción cuando los secretos obligatorios no estén configurados.
+- En esta revisión no se modificó código funcional ni información de MongoDB.
+
+### Recomendaciones para continuar
+
+1. Proteger secretos: retirar `.env` del control de versiones, agregar un `.env.example` sin credenciales y rotar cualquier secreto que haya quedado en el historial remoto.
+2. Auditar y proteger todas las rutas de escritura, separando claramente las acciones del administrador de las acciones permitidas a cada jugador.
+3. Crear pruebas automáticas para el cálculo de puntos, comodines, empates, cierre de jornadas y permisos de acceso.
+4. Probar de extremo a extremo la tabla por jornada con una jornada completa, incluyendo empate en primer lugar y resultados oficiales corregidos.
+5. Completar el `README.md` con requisitos, variables de entorno, instalación, ejecución, despliegue y respaldo/restauración.
+
+## 2026-08-11 — Mejora de contraste del ganador por jornada
+
+### Cambio realizado
+
+- Se cambió a café oscuro (`#422006`) el color del texto de la fila ganadora en la tabla por jornada.
+- El fondo amarillo de la fila se conservó y ahora tiene suficiente contraste para que el nombre, la posición y los puntos sean legibles.
+- La regla se aplicó también directamente a las celdas para evitar que estilos generales de la tabla mantengan el texto blanco.
+
+### Archivos modificados
+
+- `private/css/styles.css`
+- `CAMBIOS_PROYECTO.md`
